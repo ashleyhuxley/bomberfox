@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "bomber.h": "c",
-        "bomber_ui.h": "c",
-        "types.h": "c",
-        "stdint.h": "c"
-    }
-}
