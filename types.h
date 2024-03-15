@@ -15,9 +15,25 @@ typedef enum BlockType {
     BlockType_IrPowerup = 6
 } BlockType;
 
-typedef struct Point {
+typedef struct {
     uint8_t x;
     uint8_t y;
 } Point;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+    uint8_t planted;
+} Bomb;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} Player;
+
+typedef struct {
+    int x;
+    int y;
+} Enemy;
 
 #endif

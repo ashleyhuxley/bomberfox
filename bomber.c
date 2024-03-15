@@ -3,6 +3,7 @@
 #include "bomber_ui.h"
 #include "bomber_loop.h"
 #include "levels.h"
+#include "helpers.h"
 
 static BomberAppState* state;
 
@@ -15,6 +16,7 @@ void bomber_app_init() {
     state = malloc(sizeof(BomberAppState));
     state->queue = furi_message_queue_alloc(8, sizeof(BomberEvent));
     state->level = &level1;
+    state->player = bomber_app_get_player(state->level);
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     state->mode = BomberAppMode_Uninitialised;
 }

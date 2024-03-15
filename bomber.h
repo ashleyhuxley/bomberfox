@@ -38,6 +38,7 @@ typedef struct {
     BomberAppMode mode;
     level* level;
     bool running;
+    Player player;
 } BomberAppState;
 
 BomberAppState* bomber_app_state_get();

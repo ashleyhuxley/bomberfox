@@ -3,6 +3,8 @@
 
 static void bomber_app_stop_playing(BomberAppState* state) 
 {
+    FURI_LOG_I(TAG, "Stop playing");
+
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
     // tag_ir_rx_stop();
     state->mode = BomberAppMode_Finished;
@@ -11,6 +13,8 @@ static void bomber_app_stop_playing(BomberAppState* state)
 
 static void bomber_app_quit(BomberAppState* state)
 {
+    FURI_LOG_I(TAG, "Quitting");
+
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
     if(state->mode == BomberAppMode_Playing)
     {
@@ -37,7 +41,47 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
 {
     if(input.type == InputTypeShort && input.key == InputKeyOk)
     {
+        FURI_LOG_I(TAG, "Drop Bomb");
+    }
 
+    if(input.type == InputTypeShort && input.key == InputKeyUp)
+    {
+        FURI_LOG_I(TAG, "InputKeyUp");
+        if (state->player.y > 0)
+        {
+            state->player.y -= 1;
+            return true;
+        }
+    }
+
+    if(input.type == InputTypeShort && input.key == InputKeyDown)
+    {
+        FURI_LOG_I(TAG, "InputKeyDown");
+        if (state->player.y < 7)
+        {
+            state->player.y += 1;
+            return true;
+        }
+    }
+
+    if(input.type == InputTypeShort && input.key == InputKeyLeft)
+    {
+        FURI_LOG_I(TAG, "InputKeyLeft");
+        if (state->player.x > 0)
+        {
+            state->player.x -= 1;
+            return true;
+        }
+    }
+
+    if(input.type == InputTypeShort && input.key == InputKeyRight)
+    {
+        FURI_LOG_I(TAG, "InputKeyRight");
+        if (state->player.x < 15)
+        {
+            state->player.x += 1;
+            return true;
+        }
     }
 
     if(input.type == InputTypeShort && input.key == InputKeyBack)
