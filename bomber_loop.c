@@ -1,5 +1,6 @@
 #include "bomber.h"
 #include "bomber_loop.h"
+#include "helpers.h"
 
 static void bomber_app_stop_playing(BomberAppState* state) 
 {
@@ -37,6 +38,45 @@ static void bomber_app_error(BomberAppState* state)
     furi_mutex_release(state->data_mutex);
 }
 
+static bool bomber_app_handle_direction(BomberAppState* state, InputEvent input)
+{
+    Point newPoint = { state->player.x, state->player.y };
+
+    if(input.key == InputKeyUp)
+    {
+        if (state->player.y == 0) { return false;}
+        newPoint.y -= 1;       
+    }
+
+    if(input.key == InputKeyDown)
+    {
+        if (state->player.y >= 7) { return false; }
+        newPoint.y += 1; 
+    }
+
+    if(input.key == InputKeyLeft)
+    {
+        if (state->player.x == 0) { return false; }
+        newPoint.x -= 1; 
+    }
+
+    if(input.key == InputKeyRight)
+    {
+        if (state->player.x == 15) { return false; }
+        newPoint.x += 1;
+    }
+
+    BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
+    if (block == BlockType_Empty || block == BlockType_Player)
+    {
+        state->player.x = newPoint.x;
+        state->player.y = newPoint.y;
+        return true;
+    }
+
+    return false;
+}
+
 static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
 {
     if(input.type == InputTypeShort && input.key == InputKeyOk)
@@ -44,44 +84,9 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
         FURI_LOG_I(TAG, "Drop Bomb");
     }
 
-    if(input.type == InputTypeShort && input.key == InputKeyUp)
+    if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))
     {
-        FURI_LOG_I(TAG, "InputKeyUp");
-        if (state->player.y > 0)
-        {
-            state->player.y -= 1;
-            return true;
-        }
-    }
-
-    if(input.type == InputTypeShort && input.key == InputKeyDown)
-    {
-        FURI_LOG_I(TAG, "InputKeyDown");
-        if (state->player.y < 7)
-        {
-            state->player.y += 1;
-            return true;
-        }
-    }
-
-    if(input.type == InputTypeShort && input.key == InputKeyLeft)
-    {
-        FURI_LOG_I(TAG, "InputKeyLeft");
-        if (state->player.x > 0)
-        {
-            state->player.x -= 1;
-            return true;
-        }
-    }
-
-    if(input.type == InputTypeShort && input.key == InputKeyRight)
-    {
-        FURI_LOG_I(TAG, "InputKeyRight");
-        if (state->player.x < 15)
-        {
-            state->player.x += 1;
-            return true;
-        }
+        return bomber_app_handle_direction(state, input);
     }
 
     if(input.type == InputTypeShort && input.key == InputKeyBack)

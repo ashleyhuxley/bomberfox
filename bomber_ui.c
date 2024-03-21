@@ -1,5 +1,6 @@
 #include "bomber_ui.h"
 #include "types.h"
+#include "helpers.h"
 
 static const uint8_t brick[] = {0xff,0x11,0xff,0x88,0xff,0x11,0xff,0x88};
 static const uint8_t player[] = {0x81,0xc3,0xbd,0x81,0x99,0x42,0x24,0x18};
@@ -32,8 +33,7 @@ static void bomber_ui_render_callback(Canvas* canvas, void* context)
                 canvas_draw_xbm(canvas, ax, ay, 8, 8, player);
             }
 
-            //uint8_t value = (*state->level)[x][y];
-            BlockType block = (BlockType)(*state->level)[y][x];
+            BlockType block = (BlockType)(state->level)[ix(x, y)];
 
             switch (block)
             {

@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-typedef uint8_t level[8][16];
-
 typedef enum BlockType {
     BlockType_Empty = 0,
     BlockType_Brick = 1,

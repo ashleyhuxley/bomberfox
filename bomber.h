@@ -36,7 +36,7 @@ typedef struct {
     ViewPort* view_port;
     Gui* gui;
     BomberAppMode mode;
-    level* level;
+    uint8_t* level;
     bool running;
     Player player;
 } BomberAppState;
