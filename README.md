@@ -1,2 +1,2 @@
-# bomber
-Basic Bomberman clone
+# bomberfox
+Two player basic Bomberman game over sub ghz
