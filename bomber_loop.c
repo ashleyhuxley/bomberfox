@@ -82,6 +82,18 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
     if(input.type == InputTypeShort && input.key == InputKeyOk)
     {
         FURI_LOG_I(TAG, "Drop Bomb");
+        Bomb bomb;
+        bomb.x = state->player.x;
+        bomb.y = state->player.y;
+        bomb.state = BombState_Planted;
+        bomb.planted = state->now;
+        state->bombs[state->bomb_ix] = bomb;
+
+        state->bomb_ix++;
+        if (state->bomb_ix == 10)
+        {
+            state->bomb_ix = 0;
+        }
     }
 
     if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))

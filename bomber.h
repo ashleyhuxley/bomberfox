@@ -3,6 +3,8 @@
 
 #include <gui/gui.h>
 #include <furi_hal.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #include "types.h"
 
@@ -22,6 +24,7 @@ typedef enum {
 typedef enum {
     BomberEventType_Input,
     BomberEventType_InfraredMessage,
+    BomberEventType_Tick,
 } BomberEventType;
 
 typedef struct {
@@ -35,12 +38,19 @@ typedef struct {
     FuriMutex* data_mutex;
     ViewPort* view_port;
     Gui* gui;
+    NotificationApp* notification;
+    FuriTimer* timer;
     BomberAppMode mode;
     uint8_t* level;
     bool running;
     Player player;
+    Bomb bombs[10];
+    int bomb_ix;
+    int now;
 } BomberAppState;
 
 BomberAppState* bomber_app_state_get();
+
+void bomber_game_update_timer_callback();
 
 #endif

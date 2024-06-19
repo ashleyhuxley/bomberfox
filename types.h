@@ -13,6 +13,13 @@ typedef enum BlockType {
     BlockType_IrPowerup = 6
 } BlockType;
 
+typedef enum BombState {
+    BombState_None = 0,
+    BombState_Planted = 1,
+    BombState_Hot = 2,
+    BombState_Explode = 3
+} BombState;
+
 typedef struct {
     uint8_t x;
     uint8_t y;
@@ -22,6 +29,7 @@ typedef struct {
     uint8_t x;
     uint8_t y;
     uint8_t planted;
+    BombState state;
 } Bomb;
 
 typedef struct {

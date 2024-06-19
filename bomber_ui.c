@@ -2,9 +2,11 @@
 #include "types.h"
 #include "helpers.h"
 
-static const uint8_t brick[] = {0xff,0x11,0xff,0x88,0xff,0x11,0xff,0x88};
-static const uint8_t player[] = {0x81,0xc3,0xbd,0x81,0x99,0x42,0x24,0x18};
-//static const uint8_t bomb[] = {0x20,0x10,0x08,0x1e,0x3f,0x27,0x37,0x1e};
+static const uint8_t brick_glyph[] = {0xff,0x11,0xff,0x88,0xff,0x11,0xff,0x88};
+static const uint8_t player_glyph[] = {0x81,0xc3,0xbd,0x81,0x99,0x42,0x24,0x18};
+static const uint8_t bomb_glyph[] = {0x20,0x10,0x08,0x1e,0x3f,0x27,0x37,0x1e};
+static const uint8_t bomb_flash[] = {0x20,0x10,0x08,0x1e,0x21,0x21,0x21,0x1e};
+static const uint8_t bomb_explode[] = {0x30,0x4b,0x8d,0x61,0x22,0x91,0xaa,0xcc};
 
 static void bomber_ui_render_callback(Canvas* canvas, void* context)
 {
@@ -20,6 +22,26 @@ static void bomber_ui_render_callback(Canvas* canvas, void* context)
 
     canvas_set_bitmap_mode(canvas, true);
 
+    // Draw bombs
+    for (int i = 0; i < 10; i++)
+    {
+        Bomb bomb = state->bombs[i];
+        switch(bomb.state)
+        {
+            case BombState_Planted:
+                canvas_draw_xbm(canvas, bomb.x * 8, bomb.y * 8, 8, 8, bomb_glyph);
+                break;
+            case BombState_Hot:
+                canvas_draw_xbm(canvas, bomb.x * 8, bomb.y * 8, 8, 8, bomb_flash);
+                break;
+            case BombState_Explode:
+                canvas_draw_xbm(canvas, bomb.x * 8, bomb.y * 8, 8, 8, bomb_explode);
+                break;
+            default:
+                break;
+        }
+    }
+
     // Draw
     for (int x = 0; x < 16; x++)
     {
@@ -28,9 +50,10 @@ static void bomber_ui_render_callback(Canvas* canvas, void* context)
             int ax = x * 8;
             int ay = y * 8;
 
+            // Draw player
             if (x == state->player.x && y == state->player.y)
             {
-                canvas_draw_xbm(canvas, ax, ay, 8, 8, player);
+                canvas_draw_xbm(canvas, ax, ay, 8, 8, player_glyph);
             }
 
             BlockType block = (BlockType)(state->level)[ix(x, y)];
@@ -40,7 +63,7 @@ static void bomber_ui_render_callback(Canvas* canvas, void* context)
                 case BlockType_Empty:
                     break;
                 case BlockType_Brick:
-                    canvas_draw_xbm(canvas, ax, ay, 8, 8, brick);
+                    canvas_draw_xbm(canvas, ax, ay, 8, 8, brick_glyph);
                     break;
                 default:
                     break;
