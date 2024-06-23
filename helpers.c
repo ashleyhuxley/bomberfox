@@ -2,6 +2,7 @@
 #include "types.h"
 #include <stdbool.h>
 
+// Extracts the starting locations of the players from the level data
 Player bomber_app_get_block(uint8_t level[], BlockType blockType)
 {
     for (int x = 0; x < 16; x++)
@@ -20,6 +21,7 @@ Player bomber_app_get_block(uint8_t level[], BlockType blockType)
     return def;
 }
 
+// Helper function to calculate the 1-dimensional index from 2 dimensions
 int ix(int x, int y)
 {
     return (y * 16) + x;

@@ -17,6 +17,7 @@
 
 #define RX_TX_BUFFER_SIZE 1024
 
+// Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
 typedef enum {
     BomberAppMode_Uninitialised,
     BomberAppMode_Menu,
@@ -27,6 +28,7 @@ typedef enum {
     BomberAppMode_Quit
 } BomberAppMode;
 
+// Event types for message queue
 typedef enum {
     BomberEventType_Input,
     BomberEventType_InfraredMessage,
@@ -40,20 +42,20 @@ typedef struct {
 } BomberEvent;
 
 typedef struct {
-    FuriMessageQueue* queue;
-    FuriMutex* data_mutex;
-    ViewPort* view_port;
-    Gui* gui;
-    NotificationApp* notification;
+    FuriMessageQueue* queue;            // Message queue
+    FuriMutex* data_mutex;              // Mutex
+    ViewPort* view_port;                // Viewport
+    Gui* gui;                           // GUI
+    NotificationApp* notification;      
     FuriTimer* timer;
     BomberAppMode mode;
-    uint8_t* level;
-    bool running;
-    Player player;
-    Player enemy;
-    Bomb bombs[10];
-    int bomb_ix;
-    int now;
+    uint8_t* level;                     // Pointer to the current level array
+    bool running;                       
+    Player fox;                         // Position of the fox
+    Player wolf;                        // Position of the wolf
+    Bomb bombs[10];                     // Array of bombs
+    int bomb_ix;                        // Index of current bomb
+    int now;                            // Basic tick timer (should probably use built in ticks)
     bool isPlayerTwo;
 
     // for Sub-GHz

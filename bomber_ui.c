@@ -3,8 +3,8 @@
 #include "helpers.h"
 
 static const uint8_t brick_glyph[]  = { 0xff, 0x11, 0xff, 0x88, 0xff, 0x11, 0xff, 0x88 };
-static const uint8_t player_glyph[] = { 0x81, 0xc3, 0xbd, 0x81, 0x99, 0x42, 0x24, 0x18 };
-static const uint8_t enemy_glyph[]  = { 0x81, 0xc3, 0xff, 0xff, 0xe7, 0x7e, 0x3c, 0x18 };
+static const uint8_t fox_glyph[] = { 0x81, 0xc3, 0xbd, 0x81, 0x99, 0x42, 0x24, 0x18 };
+static const uint8_t wolf_glyph[]  = { 0x81, 0xc3, 0xff, 0xff, 0xe7, 0x7e, 0x3c, 0x18 };
 static const uint8_t bomb_glyph[]   = { 0x20, 0x10, 0x08, 0x1e, 0x3f, 0x27, 0x37, 0x1e };
 static const uint8_t bomb_flash[]   = { 0x20, 0x10, 0x08, 0x1e, 0x21, 0x21, 0x21, 0x1e };
 static const uint8_t bomb_explode[] = { 0x30, 0x4b, 0x8d, 0x61, 0x22, 0x91, 0xaa, 0xcc };
@@ -14,6 +14,9 @@ static const uint8_t fox[] = {0x08,0x00,0x01,0x00,0x14,0x80,0x02,0x00,0x24,0x4f,
 static const uint8_t wolf[] = {0x08,0x00,0x01,0x00,0x14,0x80,0x02,0x00,0x24,0x4f,0x02,0x00,0xc2,0x30,0x04,0x00,0x02,0x00,0x04,0x00,0x12,0x80,0x04,0x00,0x0a,0x00,0x05,0x00,0x44,0x20,0x02,0x00,0x82,0x10,0x04,0x00,0xc2,0x30,0x04,0x00,0x01,0x00,0x08,0x00,0x06,0x06,0xe6,0x01,0x18,0x80,0x11,0x01,0xe0,0x70,0x10,0x01,0x20,0x4f,0x08,0x01,0x20,0x40,0x08,0x01,0x10,0x80,0x84,0x00,0x10,0x80,0x84,0x00,0x50,0xa0,0x42,0x00,0x50,0xa0,0x22,0x00,0x48,0x29,0x11,0x00,0x48,0x29,0x09,0x00,0x48,0x29,0x07,0x00,0x48,0x26,0x01,0x00,0xf0,0xf9,0x00,0x00};
 
 
+// Renders the game to the viewport - called while playing
+// canvas: Pointer to the canvas to draw to
+// state: Pointer to the game state
 static void render_game(Canvas* canvas, BomberAppState* state)
 {
     // Draw bombs
@@ -45,13 +48,13 @@ static void render_game(Canvas* canvas, BomberAppState* state)
             int ay = y * 8;
 
             // Draw players
-            if (x == state->player.x && y == state->player.y)
+            if (x == state->fox.x && y == state->fox.y)
             {
-                canvas_draw_xbm(canvas, ax, ay, 8, 8, player_glyph);
+                canvas_draw_xbm(canvas, ax, ay, 8, 8, fox_glyph);
             }
-            if (x == state->enemy.x && y == state->enemy.y)
+            if (x == state->wolf.x && y == state->wolf.y)
             {
-                canvas_draw_xbm(canvas, ax, ay, 8, 8, enemy_glyph);
+                canvas_draw_xbm(canvas, ax, ay, 8, 8, wolf_glyph);
             }
 
             BlockType block = (BlockType)(state->level)[ix(x, y)];
@@ -70,6 +73,9 @@ static void render_game(Canvas* canvas, BomberAppState* state)
     }
 }
 
+// Renders the menu to the viewport - called while in the menu
+// canvas: Pointer to the canvas to draw to
+// state: Pointer to the game state
 static void render_menu(Canvas* canvas, BomberAppState* state)
 {
     FURI_LOG_T(TAG, "render_menu");
@@ -90,6 +96,9 @@ static void render_menu(Canvas* canvas, BomberAppState* state)
     canvas_draw_xbm(canvas, ax, 52, 4, 7, select_glyph);
 }
 
+// Main callback that starts off rendering
+// canvas: Pointer to the canvas to draw to
+// context: Pointer to the game state
 static void bomber_ui_render_callback(Canvas* canvas, void* context)
 {
     FURI_LOG_T(TAG, "bomber_ui_render_callback");
@@ -119,6 +128,9 @@ static void bomber_ui_render_callback(Canvas* canvas, void* context)
     furi_mutex_release(state->data_mutex);
 }
 
+// Main callback that handles input and puts it on the queue
+// input_event: The input event
+// context_q: Pointer to the message queue
 static void bomber_ui_input_callback(InputEvent* input_event, void* context_q)
 {
     FURI_LOG_T(TAG, "bomber_ui_input_callback");

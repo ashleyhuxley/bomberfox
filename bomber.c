@@ -58,6 +58,7 @@ void bomber_game_update_timer_callback() {
 
     for (int i = 0; i < 10; i++)
     {
+        // Update the bombs based on how long it's been since they were planted
         Bomb bomb = state->bombs[i];
         if (bomb.planted > 0)
         {
@@ -107,6 +108,7 @@ void bomber_app_destroy() {
     free(state);
 }
 
+// APPLICATION MAIN ENTRY POINT
 int32_t bomber_main(void* p) {
     FURI_LOG_T(TAG, "bomber_app");
     UNUSED(p);
@@ -116,13 +118,14 @@ int32_t bomber_main(void* p) {
     bomber_ui_init(state);
 
     state->mode = BomberAppMode_Menu;
+
     state->level = level1;
 
     // Figure out player starting positions from level data
-    state->player = bomber_app_get_block(state->level, BlockType_Player);
-    state->level[ix(state->player.x, state->player.y)] = (uint8_t)BlockType_Empty;
-    state->enemy = bomber_app_get_block(state->level, BlockType_Enemy);
-    state->level[ix(state->enemy.x, state->enemy.y)] = (uint8_t)BlockType_Empty;
+    state->fox = bomber_app_get_block(state->level, BlockType_Fox);
+    state->level[ix(state->fox.x, state->fox.y)] = (uint8_t)BlockType_Empty;
+    state->wolf = bomber_app_get_block(state->level, BlockType_Wolf);
+    state->level[ix(state->wolf.x, state->wolf.y)] = (uint8_t)BlockType_Empty;
 
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 

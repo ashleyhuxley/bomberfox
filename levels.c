@@ -1,5 +1,8 @@
 #include "levels.h"
 
+// Level data. These arrays are 1-dimensional bvecause 2D arrays are a BITCH in C.
+// See the function "ix" in helpers.c
+
 uint8_t level1[128] = {
     3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1,

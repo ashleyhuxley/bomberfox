@@ -9,7 +9,7 @@ static void bomber_app_stop_playing(BomberAppState* state)
     FURI_LOG_I(TAG, "Stop playing");
 
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    // tag_ir_rx_stop();
+
     state->mode = BomberAppMode_Finished;
     furi_mutex_release(state->data_mutex);
 }
@@ -19,10 +19,6 @@ static void bomber_app_quit(BomberAppState* state)
     FURI_LOG_I(TAG, "Quitting");
 
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    if(state->mode == BomberAppMode_Playing)
-    {
-        // tag_ir_rx_stop();
-    }
 
     state->mode = BomberAppMode_Quit;
     furi_mutex_release(state->data_mutex);
@@ -31,54 +27,58 @@ static void bomber_app_quit(BomberAppState* state)
 static void bomber_app_error(BomberAppState* state)
 {
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    if(state->mode == BomberAppMode_Playing)
-    {
-        //tag_ir_rx_stop();
-    }
 
     state->mode = BomberAppMode_Error;
     furi_mutex_release(state->data_mutex);
 }
 
+// Handle direction keys to move the player around
+// state: Pointer to the application state
+// input: Represents the input event
+// returns: true if the viewport should be update, else false
 static bool bomber_app_handle_direction(BomberAppState* state, InputEvent input)
 {
-    Point newPoint = { state->player.x, state->player.y };
+    Point newPoint = { state->fox.x, state->fox.y };
 
     if(input.key == InputKeyUp)
     {
-        if (state->player.y == 0) { return false;}
+        if (state->fox.y == 0) { return false;}
         newPoint.y -= 1;       
     }
 
     if(input.key == InputKeyDown)
     {
-        if (state->player.y >= 7) { return false; }
+        if (state->fox.y >= 7) { return false; }
         newPoint.y += 1; 
     }
 
     if(input.key == InputKeyLeft)
     {
-        if (state->player.x == 0) { return false; }
+        if (state->fox.x == 0) { return false; }
         newPoint.x -= 1; 
     }
 
     if(input.key == InputKeyRight)
     {
-        if (state->player.x == 15) { return false; }
+        if (state->fox.x == 15) { return false; }
         newPoint.x += 1;
     }
 
     BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
-    if (block == BlockType_Empty || block == BlockType_Player)
+    if (block == BlockType_Empty || block == BlockType_Fox)
     {
-        state->player.x = newPoint.x;
-        state->player.y = newPoint.y;
+        state->fox.x = newPoint.x;
+        state->fox.y = newPoint.y;
         return true;
     }
 
     return false;
 }
 
+// Handles input while on player select screen - just switch between Fox/Wolf
+// state: Pointer to the application state
+// input: Represents the input event
+// returns: true if the viewport should be update, else false
 static bool handle_menu_input(BomberAppState* state, InputEvent input)
 {
     if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))
@@ -96,14 +96,18 @@ static bool handle_menu_input(BomberAppState* state, InputEvent input)
     return false;
 }
 
+// Handle input while playing the game
+// state: Pointer to the application state
+// input: Represents the input event
+// returns: true if the viewport should be update, else false
 static bool handle_game_input(BomberAppState* state, InputEvent input)
 {
     if(input.type == InputTypeShort && input.key == InputKeyOk)
     {
         FURI_LOG_I(TAG, "Drop Bomb");
         Bomb bomb;
-        bomb.x = state->player.x;
-        bomb.y = state->player.y;
+        bomb.x = state->fox.x;
+        bomb.y = state->fox.y;
         bomb.state = BombState_Planted;
         bomb.planted = state->now;
         state->bombs[state->bomb_ix] = bomb;
@@ -132,6 +136,10 @@ static bool handle_game_input(BomberAppState* state, InputEvent input)
     return false;
 }
 
+// Main entrypoint for handling input
+// state: Pointer to the application state
+// input: Represents the input event
+// returns: true if the viewport should be update, else false
 static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
 {
     if(input.type == InputTypeLong && input.key == InputKeyBack)
@@ -153,6 +161,9 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
     return false;
 }
 
+// Handle the buffer once data receive has completed
+// state: Pointer to the application state
+// rx_size: Number of bytes of data recieved
 static void post_rx(BomberAppState* state, size_t rx_size)
 {
     furi_assert(state);
@@ -162,11 +173,13 @@ static void post_rx(BomberAppState* state, size_t rx_size)
 		return;
 	}
 
-    furi_check(rx_size <= RX_TX_BUFFER_SIZE);
+    // TODO: Handle incoming buffer
 
-    
+    furi_check(rx_size <= RX_TX_BUFFER_SIZE);
 }
 
+// Handle incoming subghz data
+// state: Pointer to the application state
 static void subghz_check_incoming(BomberAppState* state)
 {
 	/* if the maximum message size was reached or the
@@ -186,6 +199,8 @@ static void subghz_check_incoming(BomberAppState* state)
 	}
 }
 
+// Application main loop. 
+// state: Pointer to the application state
 void bomber_main_loop(BomberAppState* state)
 {
     FURI_LOG_I(TAG, "bomber_main_loop");
@@ -209,16 +224,6 @@ void bomber_main_loop(BomberAppState* state)
                     case BomberEventType_Input:
                         updated = bomber_app_handle_input(state, event.input);
                         break;
-                    //case BomberEventType_InfraredMessage:
-                    //    FURI_LOG_D(
-                    //        TAG,
-                    //        "Received ir with address: %lu, command: %lu",
-                    //        event.ir_message->address,
-                    //        event.ir_message->command);
-                    //    state->data->last_ir_address = event.ir_message->address;
-                    //    state->data->last_ir_command = event.ir_message->command;
-                    //    updated = true;
-                    //    break;
                     default:
                         FURI_LOG_E(TAG, "Unknown event received from queue.");
                         break;
