@@ -5,11 +5,22 @@
 #include "bomber_loop.h"
 #include "levels.h"
 #include "helpers.h"
+#include "radio_device_loader.h"
 
 static BomberAppState* state;
 
 BomberAppState* bomber_app_state_get() {
     return state;
+}
+
+/* Callback for RX events from the Sub-GHz worker. Records the current ticks as
+ * the time of the last reception. */
+static void have_read_cb(void* context)
+{
+	furi_assert(context);
+	BomberAppState* state = context;
+
+	state->last_time_rx_data = furi_get_tick();
 }
 
 void bomber_app_init() {
@@ -20,6 +31,15 @@ void bomber_app_init() {
     state->player = bomber_app_get_player(state->level);
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     state->mode = BomberAppMode_Uninitialised;
+
+    // SubGhz
+    state->subghz_worker = subghz_tx_rx_worker_alloc();
+    state->frequency = DEFAULT_FREQ;
+    subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, have_read_cb, state);
+    subghz_devices_init();
+	state->subghz_device = radio_device_loader_set(state->subghz_device, SubGhzRadioDeviceTypeExternalCC1101);
+	subghz_devices_reset(state->subghz_device);
+	subghz_devices_idle(state->subghz_device);
 
     state->notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message_block(state->notification, &sequence_display_backlight_enforce_on);

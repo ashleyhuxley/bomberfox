@@ -5,12 +5,17 @@
 #include <furi_hal.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <lib/subghz/subghz_tx_rx_worker.h>
 
 #include "types.h"
 
 #define TAG "bomb"
 
 #define LOOP_MESSAGE_TIMEOUT_ms 500
+
+#define DEFAULT_FREQ 433920000
+
+#define RX_TX_BUFFER_SIZE 1024
 
 typedef enum {
     BomberAppMode_Uninitialised,
@@ -44,9 +49,18 @@ typedef struct {
     uint8_t* level;
     bool running;
     Player player;
+    Player enemy;
     Bomb bombs[10];
     int bomb_ix;
     int now;
+
+    // for Sub-GHz
+	uint32_t frequency;
+	SubGhzTxRxWorker *subghz_worker;
+	const SubGhzDevice *subghz_device;
+    volatile uint32_t last_time_rx_data;
+    uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
+	uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
 } BomberAppState;
 
 BomberAppState* bomber_app_state_get();

@@ -2,6 +2,8 @@
 #include "bomber_loop.h"
 #include "helpers.h"
 
+#define MESSAGE_COMPLETION_TIMEOUT 500
+
 static void bomber_app_stop_playing(BomberAppState* state) 
 {
     FURI_LOG_I(TAG, "Stop playing");
@@ -119,6 +121,39 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
     return false;
 }
 
+static void post_rx(BomberAppState* state, size_t rx_size)
+{
+    furi_assert(state);
+    furi_assert(rx_size);
+
+    if (rx_size == 0) {
+		return;
+	}
+
+    furi_check(rx_size <= RX_TX_BUFFER_SIZE);
+
+    
+}
+
+static void subghz_check_incoming(BomberAppState* state)
+{
+	/* if the maximum message size was reached or the
+	 * MESSAGE_COMPLETION_TIMEOUT has expired, retrieve a message and call
+	 * post_rx() */
+	size_t avail = 0;
+	while ((avail = subghz_tx_rx_worker_available(state->subghz_worker)) > 0)
+    {
+		volatile uint32_t since_last_rx = furi_get_tick() - state->last_time_rx_data;
+		if (avail < RX_TX_BUFFER_SIZE && since_last_rx < MESSAGE_COMPLETION_TIMEOUT)
+        {
+			break;
+		}
+
+		size_t rx_size = subghz_tx_rx_worker_read(state->subghz_worker, state->rx_buffer, RX_TX_BUFFER_SIZE);
+		post_rx(state, rx_size);
+	}
+}
+
 void bomber_main_loop(BomberAppState* state)
 {
     FURI_LOG_I(TAG, "bomber_main_loop");
@@ -130,6 +165,7 @@ void bomber_main_loop(BomberAppState* state)
 
     while(state->running)
     {
+        subghz_check_incoming(state);
 
         switch(furi_message_queue_get(state->queue, &event, LOOP_MESSAGE_TIMEOUT_ms))
         {

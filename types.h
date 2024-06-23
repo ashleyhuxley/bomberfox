@@ -9,7 +9,7 @@ typedef enum BlockType {
     BlockType_Bomb = 2,
     BlockType_Player = 3,
     BlockType_Enemy = 4,
-    BlockType_Ext = 5,
+    BlockType_Exit = 5,
     BlockType_IrPowerup = 6
 } BlockType;
 
@@ -36,10 +36,5 @@ typedef struct {
     uint8_t x;
     uint8_t y;
 } Player;
-
-typedef struct {
-    int x;
-    int y;
-} Enemy;
 
 #endif
