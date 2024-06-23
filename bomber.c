@@ -88,6 +88,9 @@ void bomber_app_destroy() {
     FURI_LOG_T(TAG, "bomber_app_destroy");
     furi_timer_free(state->timer);
     furi_message_queue_free(state->queue);
+    
+    notification_message_block(state->notification, &sequence_display_backlight_enforce_auto);
+
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     furi_mutex_free(state->data_mutex);
