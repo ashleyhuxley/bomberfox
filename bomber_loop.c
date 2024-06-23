@@ -79,7 +79,24 @@ static bool bomber_app_handle_direction(BomberAppState* state, InputEvent input)
     return false;
 }
 
-static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
+static bool handle_menu_input(BomberAppState* state, InputEvent input)
+{
+    if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))
+    {
+        state->isPlayerTwo = !state->isPlayerTwo;
+        return true;
+    }
+
+    if (input.type == InputTypeShort && input.key == InputKeyOk)
+    {
+        state->mode = BomberAppMode_Playing;
+        return true;
+    }
+
+    return false;
+}
+
+static bool handle_game_input(BomberAppState* state, InputEvent input)
 {
     if(input.type == InputTypeShort && input.key == InputKeyOk)
     {
@@ -112,10 +129,25 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
         }
     }
 
+    return false;
+}
+
+static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
+{
     if(input.type == InputTypeLong && input.key == InputKeyBack)
     {
         bomber_app_quit(state);
         return false; // don't try to update the ui while quitting
+    }
+
+    switch (state->mode)
+    {
+        case BomberAppMode_Playing:
+            return handle_game_input(state, input);
+        case BomberAppMode_Menu:
+            return handle_menu_input(state, input);
+        default:
+            break;
     }
 
     return false;

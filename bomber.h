@@ -19,6 +19,7 @@
 
 typedef enum {
     BomberAppMode_Uninitialised,
+    BomberAppMode_Menu,
     BomberAppMode_Ready,
     BomberAppMode_Playing,
     BomberAppMode_Finished,
@@ -53,6 +54,7 @@ typedef struct {
     Bomb bombs[10];
     int bomb_ix;
     int now;
+    bool isPlayerTwo;
 
     // for Sub-GHz
 	uint32_t frequency;

@@ -2,15 +2,14 @@
 #include "types.h"
 #include <stdbool.h>
 
-Player bomber_app_get_player(uint8_t level[])
+Player bomber_app_get_block(uint8_t level[], BlockType blockType)
 {
     for (int x = 0; x < 16; x++)
     {
         for (int y = 0; y < 8; y++)
         {
-            if ((BlockType)level[ix(x, y)] == BlockType_Player)
+            if ((BlockType)level[ix(x, y)] == blockType)
             {
-                level[ix(x, y)] = (uint8_t)BlockType_Empty;
                 Player player = { x, y };
                 return player;
             }

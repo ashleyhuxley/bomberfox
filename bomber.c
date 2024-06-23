@@ -6,6 +6,7 @@
 #include "levels.h"
 #include "helpers.h"
 #include "radio_device_loader.h"
+#include "types.h"
 
 static BomberAppState* state;
 
@@ -25,12 +26,12 @@ static void have_read_cb(void* context)
 
 void bomber_app_init() {
     FURI_LOG_T(TAG, "bomber_app_init");
+
     state = malloc(sizeof(BomberAppState));
-    state->queue = furi_message_queue_alloc(8, sizeof(BomberEvent));
-    state->level = level1;
-    state->player = bomber_app_get_player(state->level);
-    state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     state->mode = BomberAppMode_Uninitialised;
+
+    state->queue = furi_message_queue_alloc(8, sizeof(BomberEvent));
+  
 
     // SubGhz
     state->subghz_worker = subghz_tx_rx_worker_alloc();
@@ -90,6 +91,16 @@ void bomber_app_destroy() {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     furi_mutex_free(state->data_mutex);
+
+    if (subghz_tx_rx_worker_is_running(state->subghz_worker)) {
+		//exit_game(state);
+		subghz_tx_rx_worker_stop(state->subghz_worker);
+	}
+    
+    radio_device_loader_end(state->subghz_device);
+	subghz_devices_deinit();
+    subghz_tx_rx_worker_free(state->subghz_worker);
+    
     free(state);
 }
 
@@ -100,7 +111,17 @@ int32_t bomber_main(void* p) {
     FURI_LOG_I(TAG, "Initialising app");
     bomber_app_init();
     bomber_ui_init(state);
-    state->mode = BomberAppMode_Ready;
+
+    state->mode = BomberAppMode_Menu;
+    state->level = level1;
+
+    // Figure out player starting positions from level data
+    state->player = bomber_app_get_block(state->level, BlockType_Player);
+    state->level[ix(state->player.x, state->player.y)] = (uint8_t)BlockType_Empty;
+    state->enemy = bomber_app_get_block(state->level, BlockType_Enemy);
+    state->level[ix(state->enemy.x, state->enemy.y)] = (uint8_t)BlockType_Empty;
+
+    state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     bomber_main_loop(state);
 
