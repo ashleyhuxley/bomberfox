@@ -15,7 +15,7 @@
 
 #define DEFAULT_FREQ 433920000
 
-#define RX_TX_BUFFER_SIZE 1024
+#define RX_TX_BUFFER_SIZE 3
 
 // Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
 typedef enum {

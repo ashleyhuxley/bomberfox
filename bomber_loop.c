@@ -1,6 +1,7 @@
 #include "bomber.h"
 #include "bomber_loop.h"
 #include "helpers.h"
+#include "subghz.h"
 
 #define MESSAGE_COMPLETION_TIMEOUT 500
 
@@ -73,6 +74,9 @@ static bool bomber_app_handle_direction(BomberAppState* state, InputEvent input)
     {
         player->x = newPoint.x;
         player->y = newPoint.y;
+
+        tx_new_position(player, state);
+
         return true;
     }
 
