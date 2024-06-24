@@ -38,37 +38,41 @@ static void bomber_app_error(BomberAppState* state)
 // returns: true if the viewport should be update, else false
 static bool bomber_app_handle_direction(BomberAppState* state, InputEvent input)
 {
-    Point newPoint = { state->fox.x, state->fox.y };
+    Player* player = get_player(state);
+
+    // Figure out where player will move to. If at an endge, don't move.
+    Point newPoint = { player->x, player->y };
 
     if(input.key == InputKeyUp)
     {
-        if (state->fox.y == 0) { return false;}
+        if (player->y == 0) { return false;}
         newPoint.y -= 1;       
     }
 
     if(input.key == InputKeyDown)
     {
-        if (state->fox.y >= 7) { return false; }
+        if (player->y >= 7) { return false; }
         newPoint.y += 1; 
     }
 
     if(input.key == InputKeyLeft)
     {
-        if (state->fox.x == 0) { return false; }
+        if (player->x == 0) { return false; }
         newPoint.x -= 1; 
     }
 
     if(input.key == InputKeyRight)
     {
-        if (state->fox.x == 15) { return false; }
+        if (player->x == 15) { return false; }
         newPoint.x += 1;
     }
 
+    // Only allow move to new position if the block at that position is not occupied
     BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
-    if (block == BlockType_Empty || block == BlockType_Fox)
+    if (block == BlockType_Empty)
     {
-        state->fox.x = newPoint.x;
-        state->fox.y = newPoint.y;
+        player->x = newPoint.x;
+        player->y = newPoint.y;
         return true;
     }
 
@@ -102,12 +106,14 @@ static bool handle_menu_input(BomberAppState* state, InputEvent input)
 // returns: true if the viewport should be update, else false
 static bool handle_game_input(BomberAppState* state, InputEvent input)
 {
+    Player* player = get_player(state);
+
     if(input.type == InputTypeShort && input.key == InputKeyOk)
     {
         FURI_LOG_I(TAG, "Drop Bomb");
         Bomb bomb;
-        bomb.x = state->fox.x;
-        bomb.y = state->fox.y;
+        bomb.x = player->x;
+        bomb.y = player->y;
         bomb.state = BombState_Planted;
         bomb.planted = state->now;
         state->bombs[state->bomb_ix] = bomb;
