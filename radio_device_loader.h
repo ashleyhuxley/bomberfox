@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RADIO_DEVICE_LOADER_H
+#define RADIO_DEVICE_LOADER_H
 
 #include <lib/subghz/devices/devices.h>
 
@@ -13,3 +14,5 @@ const SubGhzDevice* radio_device_loader_set(
     SubGhzRadioDeviceType radio_device_type);
 
 void radio_device_loader_end(const SubGhzDevice* radio_device);
+
+#endif

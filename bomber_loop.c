@@ -1,35 +1,41 @@
-#include "bomber.h"
 #include "bomber_loop.h"
 #include "helpers.h"
 #include "subghz.h"
 
-#define MESSAGE_COMPLETION_TIMEOUT 500
-
+// End the game but don't quit the app
+// TODO: Figure out whether this actually needs to be here. What should happen when the player presses Back during gameplay?
 static void bomber_app_stop_playing(BomberAppState* state) 
 {
     FURI_LOG_I(TAG, "Stop playing");
 
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-
     state->mode = BomberAppMode_Finished;
     furi_mutex_release(state->data_mutex);
 }
 
+// Quit the app
 static void bomber_app_quit(BomberAppState* state)
 {
     FURI_LOG_I(TAG, "Quitting");
 
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-
     state->mode = BomberAppMode_Quit;
     furi_mutex_release(state->data_mutex);
 }
 
+// Put the game in error state
 static void bomber_app_error(BomberAppState* state)
 {
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-
     state->mode = BomberAppMode_Error;
+    furi_mutex_release(state->data_mutex);
+}
+
+// Start playing
+static void bomber_app_start(BomberAppState* state)
+{
+    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
+    state->mode = BomberAppMode_Playing;
     furi_mutex_release(state->data_mutex);
 }
 
@@ -37,7 +43,7 @@ static void bomber_app_error(BomberAppState* state)
 // state: Pointer to the application state
 // input: Represents the input event
 // returns: true if the viewport should be update, else false
-static bool bomber_app_handle_direction(BomberAppState* state, InputEvent input)
+static bool handle_game_direction(BomberAppState* state, InputEvent input)
 {
     Player* player = get_player(state);
 
@@ -97,7 +103,7 @@ static bool handle_menu_input(BomberAppState* state, InputEvent input)
 
     if (input.type == InputTypeShort && input.key == InputKeyOk)
     {
-        state->mode = BomberAppMode_Playing;
+        bomber_app_start(state);
         return true;
     }
 
@@ -131,7 +137,7 @@ static bool handle_game_input(BomberAppState* state, InputEvent input)
 
     if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))
     {
-        return bomber_app_handle_direction(state, input);
+        return handle_game_direction(state, input);
     }
 
     if(input.type == InputTypeShort && input.key == InputKeyBack)
@@ -171,43 +177,6 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
     return false;
 }
 
-// Handle the buffer once data receive has completed
-// state: Pointer to the application state
-// rx_size: Number of bytes of data recieved
-static void post_rx(BomberAppState* state, size_t rx_size)
-{
-    furi_assert(state);
-    furi_assert(rx_size);
-
-    if (rx_size == 0) {
-		return;
-	}
-
-    // TODO: Handle incoming buffer
-
-    furi_check(rx_size <= RX_TX_BUFFER_SIZE);
-}
-
-// Handle incoming subghz data
-// state: Pointer to the application state
-static void subghz_check_incoming(BomberAppState* state)
-{
-	/* if the maximum message size was reached or the
-	 * MESSAGE_COMPLETION_TIMEOUT has expired, retrieve a message and call
-	 * post_rx() */
-	size_t avail = 0;
-	while ((avail = subghz_tx_rx_worker_available(state->subghz_worker)) > 0)
-    {
-		volatile uint32_t since_last_rx = furi_get_tick() - state->last_time_rx_data;
-		if (avail < RX_TX_BUFFER_SIZE && since_last_rx < MESSAGE_COMPLETION_TIMEOUT)
-        {
-			break;
-		}
-
-		size_t rx_size = subghz_tx_rx_worker_read(state->subghz_worker, state->rx_buffer, RX_TX_BUFFER_SIZE);
-		post_rx(state, rx_size);
-	}
-}
 
 // Application main loop. 
 // state: Pointer to the application state

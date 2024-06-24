@@ -24,14 +24,14 @@ static void have_read_cb(void* context)
 	state->last_time_rx_data = furi_get_tick();
 }
 
-void bomber_app_init() {
+void bomber_app_init()
+{
     FURI_LOG_T(TAG, "bomber_app_init");
 
     state = malloc(sizeof(BomberAppState));
     state->mode = BomberAppMode_Uninitialised;
 
     state->queue = furi_message_queue_alloc(8, sizeof(BomberEvent));
-  
 
     // SubGhz
     state->subghz_worker = subghz_tx_rx_worker_alloc();
@@ -109,7 +109,8 @@ void bomber_app_destroy() {
 }
 
 // APPLICATION MAIN ENTRY POINT
-int32_t bomber_main(void* p) {
+int32_t bomber_main(void* p)
+{
     FURI_LOG_T(TAG, "bomber_app");
     UNUSED(p);
 
@@ -119,6 +120,7 @@ int32_t bomber_main(void* p) {
 
     state->mode = BomberAppMode_Menu;
 
+    // TODO: This should be moved to after the menu
     state->level = level1;
 
     // Figure out player starting positions from level data

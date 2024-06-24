@@ -1,6 +1,5 @@
 #include "helpers.h"
 #include "types.h"
-#include <stdbool.h>
 
 // Extracts the starting locations of the players from the level data
 Player bomber_app_get_block(uint8_t level[], BlockType blockType)
