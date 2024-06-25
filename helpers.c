@@ -1,14 +1,15 @@
 #include "helpers.h"
 #include "types.h"
 
-// Extracts the starting locations of the players from the level data
+// Extracts the starting location of the player from the level data
+// Returns the player's position if found, otherwise returns a default position (0,0)
 Player bomber_app_get_block(uint8_t level[], BlockType blockType)
 {
-    for (int x = 0; x < 16; x++)
+    for(int x = 0; x < 16; x++)
     {
-        for (int y = 0; y < 8; y++)
+        for(int y = 0; y < 8; y++)
         {
-            if ((BlockType)level[ix(x, y)] == blockType)
+            if((BlockType)level[ix(x, y)] == blockType)
             {
                 Player player = { x, y };
                 return player;
@@ -16,6 +17,10 @@ Player bomber_app_get_block(uint8_t level[], BlockType blockType)
         }
     }
 
+    // Log a warning if the block type is not found in the level data
+    FURI_LOG_W(TAG, "Block type %d not found in level data", blockType);
+
+    // Return a default position if block type is not found
     Player def = { 0, 0 };
     return def;
 }
@@ -29,15 +34,12 @@ int ix(int x, int y)
 // Returns a pointer to the playable character depending on the isPlayerTwo state
 Player* get_player(BomberAppState* state)
 {
-    if (state->isPlayerTwo)
-    {
-        return &(state->wolf);
-    }
-    else
-    {
-        return &(state->fox);
-    }
+    // Ensure the state pointer is valid
+    furi_assert(state);
+
+    return state->isPlayerTwo ? &(state->wolf) : &(state->fox);
 }
+
 
 // Set the mode with mutex handling
 void bomber_app_set_mode(BomberAppState* state, BomberAppMode mode)
