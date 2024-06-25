@@ -10,7 +10,8 @@
 
 static BomberAppState* state;
 
-BomberAppState* bomber_app_state_get() {
+BomberAppState* bomber_app_state_get()
+{
     return state;
 }
 
@@ -51,7 +52,8 @@ void bomber_app_init()
     state->bomb_ix = 0;
 }
 
-void bomber_game_update_timer_callback() {
+void bomber_game_update_timer_callback()
+{
     FURI_LOG_T(TAG, "bomber_game_update_timer_callback");
 
     state->now++;
@@ -85,7 +87,8 @@ void bomber_game_update_timer_callback() {
     view_port_update(state->view_port);
 }
 
-void bomber_app_destroy() {
+void bomber_app_destroy()
+{
     FURI_LOG_T(TAG, "bomber_app_destroy");
     furi_timer_free(state->timer);
     furi_message_queue_free(state->queue);
