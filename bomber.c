@@ -121,7 +121,7 @@ int32_t bomber_main(void* p)
     bomber_app_init();
     bomber_ui_init(state);
 
-    state->mode = BomberAppMode_Menu;
+    bomber_app_set_mode(state, BomberAppMode_Menu);
 
     // TODO: This should be moved to after the menu
     state->level = level1;
