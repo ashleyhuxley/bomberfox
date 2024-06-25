@@ -6,6 +6,9 @@
 // state: Pointer to the game state
 void tx_new_position(Player* player, BomberAppState* state)
 {
+    furi_assert(state);
+    furi_assert(player);
+
     // First hex digit of 1st byte is character (1 = Fox, 2 = Wolf)
     uint8_t action = 0x10;
     if(state->isPlayerTwo)

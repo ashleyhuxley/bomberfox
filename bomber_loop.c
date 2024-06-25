@@ -122,7 +122,7 @@ static bool handle_game_input(BomberAppState* state, InputEvent input)
                 bomb.x = player->x;
                 bomb.y = player->y;
                 bomb.state = BombState_Planted;
-                bomb.planted = state->now;
+                bomb.planted = furi_get_tick();
                 state->bombs[state->bomb_ix] = bomb;
 
                 state->bomb_ix = (state->bomb_ix + 1) % 10;

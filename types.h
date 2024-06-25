@@ -54,7 +54,7 @@ typedef struct {
 typedef struct {
     uint8_t x;
     uint8_t y;
-    uint8_t planted;
+    uint32_t planted;
     BombState state;
 } Bomb;
 
@@ -101,7 +101,6 @@ typedef struct {
     Player wolf;                        // Position of the wolf
     Bomb bombs[10];                     // Array of bombs
     int bomb_ix;                        // Index of current bomb
-    int now;                            // Basic tick timer (should probably use built in ticks)
     bool isPlayerTwo;
 
     // for Sub-GHz

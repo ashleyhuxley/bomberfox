@@ -47,7 +47,7 @@ void bomber_app_init()
     notification_message_block(state->notification, &sequence_display_backlight_enforce_on);
 
     state->timer = furi_timer_alloc(bomber_game_update_timer_callback, FuriTimerTypePeriodic, state->queue);
-    furi_timer_start(state->timer, furi_kernel_get_tick_frequency() / 4);
+    furi_timer_start(state->timer, furi_ms_to_ticks(50));
 
     state->bomb_ix = 0;
 }
@@ -56,28 +56,26 @@ void bomber_game_update_timer_callback()
 {
     FURI_LOG_T(TAG, "bomber_game_update_timer_callback");
 
-    state->now++;
-
     for (int i = 0; i < 10; i++)
     {
         // Update the bombs based on how long it's been since they were planted
         Bomb bomb = state->bombs[i];
-        if (bomb.planted > 0)
+        if (bomb.state != BombState_None)
         {
-            int time = state->now - bomb.planted;
-            if (time > 10) { state->bombs[i].state = BombState_Hot; }
-            if (time > 11) { state->bombs[i].state = BombState_Planted; }
-            if (time > 12) { state->bombs[i].state = BombState_Hot; }
-            if (time > 13) { state->bombs[i].state = BombState_Planted; }
-            if (time > 14) { state->bombs[i].state = BombState_Hot; }
-            if (time > 15) {
+            uint32_t time = furi_get_tick() - bomb.planted;
+            if (time > furi_ms_to_ticks(2000)) { state->bombs[i].state = BombState_Hot; }
+            if (time > furi_ms_to_ticks(2100)) { state->bombs[i].state = BombState_Planted; }
+            if (time > furi_ms_to_ticks(2200)) { state->bombs[i].state = BombState_Hot; }
+            if (time > furi_ms_to_ticks(2300)) { state->bombs[i].state = BombState_Planted; }
+            if (time > furi_ms_to_ticks(2400)) { state->bombs[i].state = BombState_Hot; }
+            if (time > furi_ms_to_ticks(2500)) {
                 state->bombs[i].state = BombState_Explode;
                 (state->level)[ix(bomb.x - 1, bomb.y)] = BlockType_Empty;
                 (state->level)[ix(bomb.x + 1, bomb.y)] = BlockType_Empty;
                 (state->level)[ix(bomb.x, bomb.y - 1)] = BlockType_Empty;
                 (state->level)[ix(bomb.x, bomb.y + 1)] = BlockType_Empty;
             }
-            if (time > 16) { 
+            if (time > furi_ms_to_ticks(2600)) { 
                 state->bombs[i].planted = 0;
                 state->bombs[i].state = BombState_None;
             }
