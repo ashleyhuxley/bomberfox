@@ -7,71 +7,60 @@
 static void bomber_app_stop_playing(BomberAppState* state) 
 {
     FURI_LOG_I(TAG, "Stop playing");
-
-    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    state->mode = BomberAppMode_Finished;
-    furi_mutex_release(state->data_mutex);
+    bomber_app_set_mode(state, BomberAppMode_Finished);
 }
 
 // Quit the app
 static void bomber_app_quit(BomberAppState* state)
 {
     FURI_LOG_I(TAG, "Quitting");
-
-    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    state->mode = BomberAppMode_Quit;
-    furi_mutex_release(state->data_mutex);
+    bomber_app_set_mode(state, BomberAppMode_Quit);
 }
 
 // Put the game in error state
 static void bomber_app_error(BomberAppState* state)
 {
-    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    state->mode = BomberAppMode_Error;
-    furi_mutex_release(state->data_mutex);
+    FURI_LOG_E(TAG, "Error occurred");
+    bomber_app_set_mode(state, BomberAppMode_Error);
 }
 
 // Start playing
 static void bomber_app_start(BomberAppState* state)
 {
-    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    state->mode = BomberAppMode_Playing;
-    furi_mutex_release(state->data_mutex);
+    FURI_LOG_I(TAG, "Start playing");
+    bomber_app_set_mode(state, BomberAppMode_Playing);
 }
 
 // Handle direction keys to move the player around
 // state: Pointer to the application state
 // input: Represents the input event
-// returns: true if the viewport should be update, else false
+// returns: true if the viewport should be updated, else false
 static bool handle_game_direction(BomberAppState* state, InputEvent input)
 {
     Player* player = get_player(state);
 
-    // Figure out where player will move to. If at an endge, don't move.
     Point newPoint = { player->x, player->y };
 
-    if(input.key == InputKeyUp)
+    switch(input.key)
     {
-        if (player->y == 0) { return false;}
-        newPoint.y -= 1;       
-    }
-
-    if(input.key == InputKeyDown)
-    {
-        if (player->y >= 7) { return false; }
-        newPoint.y += 1; 
-    }
-
-    if(input.key == InputKeyLeft)
-    {
-        if (player->x == 0) { return false; }
-        newPoint.x -= 1; 
-    }
-
-    if(input.key == InputKeyRight)
-    {
-        if (player->x == 15) { return false; }
-        newPoint.x += 1;
+        case InputKeyUp:
+            if (player->y == 0) return false;
+            newPoint.y -= 1;
+            break;
+        case InputKeyDown:
+            if (player->y >= 7) return false;
+            newPoint.y += 1;
+            break;
+        case InputKeyLeft:
+            if (player->x == 0) return false;
+            newPoint.x -= 1;
+            break;
+        case InputKeyRight:
+            if (player->x >= 15) return false;
+            newPoint.x += 1;
+            break;
+        default:
+            return false;
     }
 
     // Only allow move to new position if the block at that position is not occupied
@@ -92,76 +81,82 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input)
 // Handles input while on player select screen - just switch between Fox/Wolf
 // state: Pointer to the application state
 // input: Represents the input event
-// returns: true if the viewport should be update, else false
+// returns: true if the viewport should be updated, else false
 static bool handle_menu_input(BomberAppState* state, InputEvent input)
 {
-    if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))
+    if (input.type == InputTypeShort)
     {
-        state->isPlayerTwo = !state->isPlayerTwo;
-        return true;
+        switch(input.key)
+        {
+            case InputKeyUp:
+            case InputKeyDown:
+            case InputKeyLeft:
+            case InputKeyRight:
+                state->isPlayerTwo = !state->isPlayerTwo;
+                return true;
+            case InputKeyOk:
+                bomber_app_start(state);
+                return true;
+            default:
+                return false;
+        }
     }
-
-    if (input.type == InputTypeShort && input.key == InputKeyOk)
-    {
-        bomber_app_start(state);
-        return true;
-    }
-
     return false;
 }
 
 // Handle input while playing the game
 // state: Pointer to the application state
 // input: Represents the input event
-// returns: true if the viewport should be update, else false
+// returns: true if the viewport should be updated, else false
 static bool handle_game_input(BomberAppState* state, InputEvent input)
 {
     Player* player = get_player(state);
 
-    if(input.type == InputTypeShort && input.key == InputKeyOk)
+    if(input.type == InputTypeShort)
     {
-        FURI_LOG_I(TAG, "Drop Bomb");
-        Bomb bomb;
-        bomb.x = player->x;
-        bomb.y = player->y;
-        bomb.state = BombState_Planted;
-        bomb.planted = state->now;
-        state->bombs[state->bomb_ix] = bomb;
-
-        state->bomb_ix++;
-        if (state->bomb_ix == 10)
+        switch(input.key)
         {
-            state->bomb_ix = 0;
-        }
-    }
+            case InputKeyOk:
+                FURI_LOG_I(TAG, "Drop Bomb");
+                Bomb bomb;
+                bomb.x = player->x;
+                bomb.y = player->y;
+                bomb.state = BombState_Planted;
+                bomb.planted = state->now;
+                state->bombs[state->bomb_ix] = bomb;
 
-    if (input.type == InputTypeShort && (input.key == InputKeyUp || input.key == InputKeyDown || input.key == InputKeyLeft || input.key == InputKeyRight))
-    {
-        return handle_game_direction(state, input);
-    }
-
-    if(input.type == InputTypeShort && input.key == InputKeyBack)
-    {
-        if(state->mode == BomberAppMode_Playing)
-        {
-            bomber_app_stop_playing(state);
-            return true;
+                state->bomb_ix = (state->bomb_ix + 1) % 10;
+                return true;
+            case InputKeyUp:
+            case InputKeyDown:
+            case InputKeyLeft:
+            case InputKeyRight:
+                return handle_game_direction(state, input);
+            case InputKeyBack:
+                if(state->mode == BomberAppMode_Playing)
+                {
+                    bomber_app_stop_playing(state);
+                    return true;
+                }
+                break;
+            default:
+                break;
         }
     }
 
     return false;
 }
 
-// Main entrypoint for handling input
+// Main entry point for handling input
 // state: Pointer to the application state
 // input: Represents the input event
-// returns: true if the viewport should be update, else false
+// returns: true if the viewport should be updated, else false
 static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
 {
     if(input.type == InputTypeLong && input.key == InputKeyBack)
     {
         bomber_app_quit(state);
-        return false; // don't try to update the ui while quitting
+        return false; // don't try to update the UI while quitting
     }
 
     switch (state->mode)
@@ -177,8 +172,7 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
     return false;
 }
 
-
-// Application main loop. 
+// Application main loop
 // state: Pointer to the application state
 void bomber_main_loop(BomberAppState* state)
 {

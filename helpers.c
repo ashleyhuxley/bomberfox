@@ -38,3 +38,11 @@ Player* get_player(BomberAppState* state)
         return &(state->fox);
     }
 }
+
+// Set the mode with mutex handling
+void bomber_app_set_mode(BomberAppState* state, BomberAppMode mode)
+{
+    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
+    state->mode = mode;
+    furi_mutex_release(state->data_mutex);
+}
