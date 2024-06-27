@@ -7,6 +7,7 @@
 #include "helpers.h"
 #include "radio_device_loader.h"
 #include "types.h"
+//#include <dolphin/dolphin.h>
 
 static BomberAppState* state;
 
@@ -25,22 +26,25 @@ static void have_read_cb(void* context)
     state->last_time_rx_data = furi_get_tick();
 }
 
-void bomber_app_init()
+bool bomber_app_init()
 {
     FURI_LOG_T(TAG, "bomber_app_init");
 
     state = malloc(sizeof(BomberAppState));
     if (!state) {
         FURI_LOG_E(TAG, "Failed to allocate memory for BomberAppState");
-        return;
+        return false;
     }
-    state->mode = BomberAppMode_Uninitialised;
+
+    state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+
+    bomber_app_set_mode(state, BomberAppMode_Uninitialised);
 
     state->queue = furi_message_queue_alloc(8, sizeof(BomberEvent));
     if (!state->queue) {
         FURI_LOG_E(TAG, "Failed to allocate message queue");
         free(state);
-        return;
+        return false;
     }
 
     // SubGhz
@@ -49,8 +53,9 @@ void bomber_app_init()
         FURI_LOG_E(TAG, "Failed to allocate SubGhz worker");
         furi_message_queue_free(state->queue);
         free(state);
-        return;
+        return false;
     }
+
     state->frequency = DEFAULT_FREQ;
     subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, have_read_cb, state);
     subghz_devices_init();
@@ -58,14 +63,17 @@ void bomber_app_init()
     subghz_devices_reset(state->subghz_device);
     subghz_devices_idle(state->subghz_device);
 
+    FURI_LOG_T(TAG, state->subghz_device->name);
+
     state->notification = furi_record_open(RECORD_NOTIFICATION);
     if (!state->notification) {
         FURI_LOG_E(TAG, "Failed to open notification record");
         subghz_tx_rx_worker_free(state->subghz_worker);
         furi_message_queue_free(state->queue);
         free(state);
-        return;
+        return false;
     }
+
     notification_message_block(state->notification, &sequence_display_backlight_enforce_on);
 
     state->timer = furi_timer_alloc(bomber_game_update_timer_callback, FuriTimerTypePeriodic, state->queue);
@@ -75,11 +83,18 @@ void bomber_app_init()
         subghz_tx_rx_worker_free(state->subghz_worker);
         furi_message_queue_free(state->queue);
         free(state);
-        return;
+        return false;
     }
+
+    //DOLPHIN_DEED(DolphinDeedPluginGameStart);
+
+    subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device, state->frequency);
+
     furi_timer_start(state->timer, furi_ms_to_ticks(50));
 
     state->bomb_ix = 0;
+
+    return true;
 }
 
 void bomber_game_update_timer_callback()
@@ -118,6 +133,7 @@ void bomber_game_update_timer_callback()
 void bomber_app_destroy()
 {
     FURI_LOG_T(TAG, "bomber_app_destroy");
+
     furi_timer_free(state->timer);
     furi_message_queue_free(state->queue);
     
@@ -127,7 +143,8 @@ void bomber_app_destroy()
     furi_record_close(RECORD_GUI);
     furi_mutex_free(state->data_mutex);
 
-    if (subghz_tx_rx_worker_is_running(state->subghz_worker)) {
+    if (subghz_tx_rx_worker_is_running(state->subghz_worker))
+    {
         subghz_tx_rx_worker_stop(state->subghz_worker);
     }
     
@@ -145,7 +162,12 @@ int32_t bomber_main(void* p)
     UNUSED(p);
 
     FURI_LOG_I(TAG, "Initializing app");
-    bomber_app_init();
+
+    if (!bomber_app_init())
+    {
+        return 1;
+    }
+
     bomber_ui_init(state);
 
     bomber_app_set_mode(state, BomberAppMode_Menu);
@@ -158,8 +180,6 @@ int32_t bomber_main(void* p)
     state->level[ix(state->fox.x, state->fox.y)] = (uint8_t)BlockType_Empty;
     state->wolf = bomber_app_get_block(state->level, BlockType_Wolf);
     state->level[ix(state->wolf.x, state->wolf.y)] = (uint8_t)BlockType_Empty;
-
-    state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     bomber_main_loop(state);
 
