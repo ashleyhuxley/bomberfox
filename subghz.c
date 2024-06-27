@@ -9,14 +9,14 @@ void tx_new_position(Player* player, BomberAppState* state)
     furi_assert(state);
     furi_assert(player);
 
-    // First hex digit of 1st byte is character (1 = Fox, 2 = Wolf)
-    uint8_t action = 0x10;
+    // First hex digit of 1st byte is character (0 = Fox, 1 = Wolf)
+    uint8_t action = 0x00;
     if(state->isPlayerTwo)
     {
-        action += 0x10;
+        action = action | 0x10;
     }
 
-    // Move action (Fox move = 0x11, Wolf move = 0x21)
+    // Move action (Fox move = 0x01, Wolf move = 0x11)
     action += 0x01;
 
     state->tx_buffer[0] = action;
@@ -42,18 +42,16 @@ static void post_rx(BomberAppState* state, size_t rx_size)
         return;
     }
 
-    FURI_LOG_D(TAG, "Received data: 0x%02X 0x%12X 0x%22X", state->rx_buffer[0], state->rx_buffer[1], state->rx_buffer[2]);
-
-    // TODO: Handle incoming buffer
-    Player* player = &state->wolf;
-    player->x = state->rx_buffer[1];
-    player->y = state->rx_buffer[2];
-    view_port_update(state->view_port);
-    // END TODO
-
     // Ensure received size is within buffer limits
     furi_check(rx_size <= RX_TX_BUFFER_SIZE);
     FURI_LOG_T(TAG, "Received data size: %zu", rx_size);
+    FURI_LOG_T(TAG, "Received data: 0x%02X 0x%12X 0x%22X", state->rx_buffer[0], state->rx_buffer[1], state->rx_buffer[2]);
+
+    // TODO: Handle other actions
+    Player* player = (state->rx_buffer[0] > 0x10) ? &state->wolf : &state->fox;
+    player->x = state->rx_buffer[1];
+    player->y = state->rx_buffer[2];
+    view_port_update(state->view_port);
 }
 
 // Handle incoming subghz data
