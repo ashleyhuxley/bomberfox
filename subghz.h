@@ -7,5 +7,6 @@
 
 void tx_new_position(Player* player, BomberAppState* state);
 void subghz_check_incoming(BomberAppState* state);
+void have_read_cb(void* context);
 
 #endif

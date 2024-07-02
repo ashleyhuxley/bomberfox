@@ -223,3 +223,41 @@ void bomber_main_loop(BomberAppState* state)
         }
     }
 }
+
+void bomber_game_tick(BomberAppState* state)
+{
+    FURI_LOG_T(TAG, "bomber_game_tick");
+
+    for (int i = 0; i < 10; i++)
+    {
+        // Update the bombs based on how long it's been since they were planted
+        Bomb bomb = state->bombs[i];
+        if (bomb.state != BombState_None)
+        {
+            uint32_t time = furi_get_tick() - bomb.planted;
+            if (time > furi_ms_to_ticks(2000)) { state->bombs[i].state = BombState_Hot; }
+            if (time > furi_ms_to_ticks(2100)) { state->bombs[i].state = BombState_Planted; }
+            if (time > furi_ms_to_ticks(2200)) { state->bombs[i].state = BombState_Hot; }
+            if (time > furi_ms_to_ticks(2300)) { state->bombs[i].state = BombState_Planted; }
+            if (time > furi_ms_to_ticks(2400)) { state->bombs[i].state = BombState_Hot; }
+
+            // TODO: Index function makes destroyed blocks overflow
+            if (time > furi_ms_to_ticks(2500))
+            {
+                state->bombs[i].state = BombState_Explode;
+                (state->level)[ix(bomb.x - 1, bomb.y)] = BlockType_Empty;
+                (state->level)[ix(bomb.x + 1, bomb.y)] = BlockType_Empty;
+                (state->level)[ix(bomb.x, bomb.y - 1)] = BlockType_Empty;
+                (state->level)[ix(bomb.x, bomb.y + 1)] = BlockType_Empty;
+            }
+
+            if (time > furi_ms_to_ticks(2600))
+            {
+                state->bombs[i].planted = 0;
+                state->bombs[i].state = BombState_None;
+            }
+        }
+    }
+
+    view_port_update(state->view_port);
+}

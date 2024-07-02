@@ -75,3 +75,13 @@ void subghz_check_incoming(BomberAppState* state)
         post_rx(state, rx_size);
     }
 }
+
+/* Callback for RX events from the Sub-GHz worker. Records the current ticks as
+ * the time of the last reception. */
+void have_read_cb(void* context)
+{
+    furi_assert(context);
+    BomberAppState* state = context;
+
+    state->last_time_rx_data = furi_get_tick();
+}

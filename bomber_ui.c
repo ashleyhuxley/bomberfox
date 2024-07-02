@@ -88,7 +88,7 @@ static void render_menu(Canvas* canvas, BomberAppState* state)
 }
 
 // Main callback that starts off rendering
-static void bomber_ui_render_callback(Canvas* canvas, void* context)
+void bomber_ui_render_callback(Canvas* canvas, void* context)
 {
     FURI_LOG_T(TAG, "bomber_ui_render_callback");
 
@@ -119,7 +119,7 @@ static void bomber_ui_render_callback(Canvas* canvas, void* context)
 }
 
 // Main callback that handles input and puts it on the queue
-static void bomber_ui_input_callback(InputEvent* input_event, void* context_q)
+void bomber_ui_input_callback(InputEvent* input_event, void* context_q)
 {
     FURI_LOG_T(TAG, "bomber_ui_input_callback");
     furi_assert(context_q);
@@ -131,27 +131,4 @@ static void bomber_ui_input_callback(InputEvent* input_event, void* context_q)
     {
         FURI_LOG_W(TAG, "Failed to put input event in message queue");
     }
-}
-
-// Initializes the UI components for the Bomber app
-void bomber_ui_init(BomberAppState* state)
-{
-    FURI_LOG_T(TAG, "bomber_ui_init");
-
-    state->view_port = view_port_alloc();
-    view_port_draw_callback_set(state->view_port, bomber_ui_render_callback, state);
-    view_port_input_callback_set(state->view_port, bomber_ui_input_callback, state->queue);
-    state->gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(state->gui, state->view_port, GuiLayerFullscreen);
-}
-
-// Destroys the UI components for the Bomber app
-void bomber_ui_destroy(BomberAppState* state)
-{
-    FURI_LOG_T(TAG, "bomber_ui_destroy");
-
-    view_port_enabled_set(state->view_port, false);
-    gui_remove_view_port(state->gui, state->view_port);
-    view_port_free(state->view_port);
-    furi_record_close(RECORD_GUI);
 }

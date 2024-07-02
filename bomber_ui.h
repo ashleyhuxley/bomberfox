@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void bomber_ui_init(BomberAppState* state);
-void bomber_ui_destroy(BomberAppState* state);
+void bomber_ui_render_callback(Canvas* canvas, void* context);
+void bomber_ui_input_callback(InputEvent* input_event, void* context_q);
 
 #endif
