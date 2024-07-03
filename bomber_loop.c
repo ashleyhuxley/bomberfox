@@ -303,10 +303,13 @@ static bool update_bombs(Player* player, BomberAppState* state)
 
 void bomber_game_tick(BomberAppState* state)
 {
-    update_bombs(&state->fox, state);
-    update_bombs(&state->wolf, state);
+    bool changed = false;
+    changed &= update_bombs(&state->fox, state);
+    changed &= update_bombs(&state->wolf, state);
 
-    // TODO: Only update if something changed
-    view_port_update(state->view_port);
+    if (changed)
+    {
+        view_port_update(state->view_port);
+    }
 }
 
