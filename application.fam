@@ -1,8 +1,8 @@
 # For details & more options, see documentation/AppManifests.md in firmware repo
 
 App(
-    appid="fenbomber",  # Must be unique
-    name="BomberFops",  # Displayed in menus
+    appid="bomberfox",  # Must be unique
+    name="Bomber Fox",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bomber_main",
     stack_size=2 * 1024,
@@ -11,6 +11,6 @@ App(
     fap_icon="fops.png",  # 10x10 1-bit PNG
     fap_description="Simple bomber game",
     fap_author="Electric Fox",
-    # fap_weburl="https://github.com/ashleyhuxley/bomber",
+    fap_weburl="https://github.com/ashleyhuxley/bomber",
     fap_icon_assets="images",  # Image assets to compile for this application
 )

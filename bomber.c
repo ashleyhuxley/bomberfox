@@ -111,49 +111,54 @@ void bomber_game_update_timer_callback()
 
 void bomber_app_destroy()
 {
-    FURI_LOG_T(TAG, "bomber_app_destroy");
-
-    if (state->view_port)
-    {
-        view_port_enabled_set(state->view_port, false);
-        gui_remove_view_port(state->gui, state->view_port);
-        view_port_free(state->view_port);
-        state->view_port = NULL;
-        furi_record_close(RECORD_GUI);
-    }
-    
-    if (subghz_tx_rx_worker_is_running(state->subghz_worker))
-    {
-        subghz_tx_rx_worker_stop(state->subghz_worker);
-    }
-    
-    radio_device_loader_end(state->subghz_device);
-    subghz_devices_deinit();
-    subghz_tx_rx_worker_free(state->subghz_worker);
+    FURI_LOG_T(TAG, "Destroying app:");
 
     if (state->timer)
     {
+        FURI_LOG_T(TAG, "  Destroying timer");
         furi_timer_free(state->timer);
         state->timer = NULL;
     }
 
+    FURI_LOG_T(TAG, "  Removing notification");
     notification_message_block(state->notification, &sequence_display_backlight_enforce_auto);
     furi_record_close(RECORD_NOTIFICATION);
 
+    FURI_LOG_T(TAG, "  Destroying Viewport & GUI");
+    view_port_enabled_set(state->view_port, false);
+    gui_remove_view_port(state->gui, state->view_port);
+    view_port_free(state->view_port);
+    state->view_port = NULL;
+    furi_record_close(RECORD_GUI);
+    
+    if (subghz_tx_rx_worker_is_running(state->subghz_worker))
+    {
+        FURI_LOG_T(TAG, "  Stopping SubGhz worker");
+        subghz_tx_rx_worker_stop(state->subghz_worker);
+    }
+    
+    FURI_LOG_T(TAG, "  Freeing SubGhz device");
+    radio_device_loader_end(state->subghz_device);
+    subghz_devices_deinit();
+    subghz_tx_rx_worker_free(state->subghz_worker);
+
     if (state->queue)
     {
+        FURI_LOG_T(TAG, "  Freeing message queue");
         furi_message_queue_free(state->queue);
         state->queue = NULL;
     }
 
     if (state->data_mutex)
     {
+        FURI_LOG_T(TAG, "  Freeing mutex");
         furi_mutex_free(state->data_mutex);
         state->data_mutex = NULL;
     }
     
     if (state)
     {
+        FURI_LOG_T(TAG, "  Freeing app state memory");
         free(state);
         state = NULL;
     }

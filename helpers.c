@@ -34,9 +34,7 @@ int ix(int x, int y)
 // Returns a pointer to the playable character depending on the isPlayerTwo state
 Player* get_player(BomberAppState* state)
 {
-    // Ensure the state pointer is valid
     furi_assert(state);
-
     return state->isPlayerTwo ? &(state->wolf) : &(state->fox);
 }
 

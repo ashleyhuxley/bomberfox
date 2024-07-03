@@ -176,7 +176,7 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input)
 // state: Pointer to the application state
 void bomber_main_loop(BomberAppState* state)
 {
-    FURI_LOG_I(TAG, "bomber_main_loop");
+    FURI_LOG_I(TAG, "Begin application main loop");
     view_port_update(state->view_port);
 
     BomberEvent event;
@@ -226,8 +226,6 @@ void bomber_main_loop(BomberAppState* state)
 
 void bomber_game_tick(BomberAppState* state)
 {
-    FURI_LOG_T(TAG, "bomber_game_tick");
-
     for (int i = 0; i < 10; i++)
     {
         // Update the bombs based on how long it's been since they were planted
@@ -259,5 +257,6 @@ void bomber_game_tick(BomberAppState* state)
         }
     }
 
+    // TODO: Only update if something changed
     view_port_update(state->view_port);
 }

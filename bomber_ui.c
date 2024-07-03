@@ -73,8 +73,6 @@ static void render_game(Canvas* canvas, BomberAppState* state)
 // Renders the menu to the viewport - called while in the menu
 static void render_menu(Canvas* canvas, BomberAppState* state)
 {
-    FURI_LOG_T(TAG, "render_menu");
-
     uint8_t ax = state->isPlayerTwo ? 70 : 20;
 
     canvas_set_font(canvas, FontSecondary);
@@ -90,8 +88,6 @@ static void render_menu(Canvas* canvas, BomberAppState* state)
 // Main callback that starts off rendering
 void bomber_ui_render_callback(Canvas* canvas, void* context)
 {
-    FURI_LOG_T(TAG, "bomber_ui_render_callback");
-
     furi_assert(context);
     BomberAppState* state = context;
 
