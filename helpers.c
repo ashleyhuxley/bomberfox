@@ -11,7 +11,12 @@ Player bomber_app_get_block(uint8_t level[], BlockType blockType)
         {
             if((BlockType)level[ix(x, y)] == blockType)
             {
-                Player player = { x, y };
+                Player player = {
+                    .x = x,
+                    .y = y,
+                    .bombs = { [0 ... 9] = {0, 0, 0, BombState_None} },  // All elements initialized the same way
+                    .bomb_power = 1
+                };
                 return player;
             }
         }
@@ -21,7 +26,12 @@ Player bomber_app_get_block(uint8_t level[], BlockType blockType)
     FURI_LOG_W(TAG, "Block type %d not found in level data", blockType);
 
     // Return a default position if block type is not found
-    Player def = { 0, 0 };
+    Player def = {
+        .x = 0,
+        .y = 0,
+        .bombs = { [0 ... 9] = {0, 0, 0, BombState_None} },  // All elements initialized the same way
+        .bomb_power = 1
+    };
     return def;
 }
 

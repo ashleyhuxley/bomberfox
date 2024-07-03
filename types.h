@@ -61,6 +61,8 @@ typedef struct {
 typedef struct {
     uint8_t x;
     uint8_t y;
+    Bomb bombs[10];                     // Array of bombs
+    uint8_t bomb_power;                 // Number of blocks a bomb will destroy
 } Player;
 
 // Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
@@ -99,8 +101,7 @@ typedef struct {
     bool running;                       
     Player fox;                         // Position of the fox
     Player wolf;                        // Position of the wolf
-    Bomb bombs[10];                     // Array of bombs
-    int bomb_ix;                        // Index of current bomb
+    int bomb_ix;                        // Index of current bomb for current player
     bool isPlayerTwo;
 
     // for Sub-GHz

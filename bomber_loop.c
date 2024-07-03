@@ -2,6 +2,13 @@
 #include "helpers.h"
 #include "subghz.h"
 
+#define BOMB_HOT_TIME      furi_ms_to_ticks(2000)
+#define BOMB_PLANTED_TIME  furi_ms_to_ticks(2100)
+#define BOMB_EXPLODE_TIME  furi_ms_to_ticks(2500)
+#define BOMB_RESET_TIME    furi_ms_to_ticks(2600)
+#define MAX_X              16
+#define MAX_Y              8
+
 // End the game but don't quit the app
 // TODO: Figure out whether this actually needs to be here. What should happen when the player presses Back during gameplay?
 static void bomber_app_stop_playing(BomberAppState* state) 
@@ -118,12 +125,13 @@ static bool handle_game_input(BomberAppState* state, InputEvent input)
         {
             case InputKeyOk:
                 FURI_LOG_I(TAG, "Drop Bomb");
+               
                 Bomb bomb;
                 bomb.x = player->x;
                 bomb.y = player->y;
                 bomb.state = BombState_Planted;
                 bomb.planted = furi_get_tick();
-                state->bombs[state->bomb_ix] = bomb;
+                player->bombs[state->bomb_ix] = bomb;
 
                 state->bomb_ix = (state->bomb_ix + 1) % 10;
                 return true;
@@ -224,39 +232,81 @@ void bomber_main_loop(BomberAppState* state)
     }
 }
 
-void bomber_game_tick(BomberAppState* state)
+static bool update_bombs(Player* player, BomberAppState* state)
 {
-    for (int i = 0; i < 10; i++)
-    {
-        // Update the bombs based on how long it's been since they were planted
-        Bomb bomb = state->bombs[i];
-        if (bomb.state != BombState_None)
-        {
-            uint32_t time = furi_get_tick() - bomb.planted;
-            if (time > furi_ms_to_ticks(2000)) { state->bombs[i].state = BombState_Hot; }
-            if (time > furi_ms_to_ticks(2100)) { state->bombs[i].state = BombState_Planted; }
-            if (time > furi_ms_to_ticks(2200)) { state->bombs[i].state = BombState_Hot; }
-            if (time > furi_ms_to_ticks(2300)) { state->bombs[i].state = BombState_Planted; }
-            if (time > furi_ms_to_ticks(2400)) { state->bombs[i].state = BombState_Hot; }
+    bool changed = false;
 
-            // TODO: Index function makes destroyed blocks overflow
-            if (time > furi_ms_to_ticks(2500))
+    for (uint8_t i = 0; i < 10; i++)
+    {
+        Bomb* bomb = &player->bombs[i];
+        if (bomb->state != BombState_None)
+        {
+            uint32_t time = furi_get_tick() - bomb->planted;
+
+            if (time > BOMB_RESET_TIME)
             {
-                state->bombs[i].state = BombState_Explode;
-                (state->level)[ix(bomb.x - 1, bomb.y)] = BlockType_Empty;
-                (state->level)[ix(bomb.x + 1, bomb.y)] = BlockType_Empty;
-                (state->level)[ix(bomb.x, bomb.y - 1)] = BlockType_Empty;
-                (state->level)[ix(bomb.x, bomb.y + 1)] = BlockType_Empty;
+                bomb->planted = 0;
+                bomb->state = BombState_None;
+                continue;
             }
 
-            if (time > furi_ms_to_ticks(2600))
+            if (time > BOMB_EXPLODE_TIME)
             {
-                state->bombs[i].planted = 0;
-                state->bombs[i].state = BombState_None;
+                bomb->state = BombState_Explode;
+
+                for (uint8_t j = 0; j < player->bomb_power + 1; j++)
+                {
+                    uint8_t bx, by;
+
+                    bx = bomb->x - j;
+                    by = bomb->y;
+                    if (bx < MAX_X) {
+                        changed = true;
+                        state->level[ix(bx, by)] = BlockType_Empty;
+                    }
+
+                    bx = bomb->x + j;
+                    by = bomb->y;
+                    if (bx < MAX_X) {
+                        changed = true;
+                        state->level[ix(bx, by)] = BlockType_Empty;
+                    }
+
+                    bx = bomb->x;
+                    by = bomb->y - j;
+                    if (by < MAX_Y) {
+                        changed = true;
+                        state->level[ix(bx, by)] = BlockType_Empty;
+                    }
+
+                    bx = bomb->x;
+                    by = bomb->y + j;
+                    if (by < MAX_Y) {
+                        changed = true;
+                        state->level[ix(bx, by)] = BlockType_Empty;
+                    }
+                }
+
+                continue;
+            }
+
+            if (time > BOMB_PLANTED_TIME) {
+                bomb->state = BombState_Planted;
+            } else if (time > BOMB_HOT_TIME) {
+                bomb->state = BombState_Hot;
             }
         }
     }
 
+    return changed;
+}
+
+void bomber_game_tick(BomberAppState* state)
+{
+    update_bombs(&state->fox, state);
+    update_bombs(&state->wolf, state);
+
     // TODO: Only update if something changed
     view_port_update(state->view_port);
 }
+

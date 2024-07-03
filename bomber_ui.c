@@ -47,7 +47,8 @@ static void render_game(Canvas* canvas, BomberAppState* state)
     // Draw bombs
     for(int i = 0; i < 10; i++)
     {
-        draw_bomb(canvas, state->bombs[i]);
+        draw_bomb(canvas, state->fox.bombs[i]);
+        draw_bomb(canvas, state->wolf.bombs[i]);
     }
 
     // Draw players and blocks
