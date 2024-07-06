@@ -1,6 +1,11 @@
 #include "subghz.h"
 #include "types.h"
 
+#define ACTION_MOVE 0x00
+#define ACTION_BOMB 0x01
+
+#define PLAYER_TWO 0x10
+
 // Transmit player position to other flipper
 // player: Pointer to the current player structure
 // state: Pointer to the game state
@@ -10,14 +15,11 @@ void tx_new_position(Player* player, BomberAppState* state)
     furi_assert(player);
 
     // First hex digit of 1st byte is character (0 = Fox, 1 = Wolf)
-    uint8_t action = 0x00;
+    uint8_t action = ACTION_MOVE;
     if(state->isPlayerTwo)
     {
-        action = action | 0x10;
+        action = action | PLAYER_TWO;
     }
-
-    // Move action (Fox move = 0x01, Wolf move = 0x11)
-    action += 0x01;
 
     state->tx_buffer[0] = action;
     state->tx_buffer[1] = player->x;
@@ -25,6 +27,23 @@ void tx_new_position(Player* player, BomberAppState* state)
 
     // Transmit the buffer
     FURI_LOG_I(TAG, "Transmitting new position: action=0x%02X, x=%d, y=%d", action, player->x, player->y);
+    subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer, RX_TX_BUFFER_SIZE);
+}
+
+void tx_bomb_placement(BomberAppState* state, uint8_t x, uint8_t y)
+{
+    uint8_t action = ACTION_BOMB;
+    if(state->isPlayerTwo)
+    {
+        action = action | PLAYER_TWO;
+    }
+
+    state->tx_buffer[0] = action;
+    state->tx_buffer[1] = x;
+    state->tx_buffer[2] = y;
+
+    // Transmit the bomb
+    FURI_LOG_I(TAG, "Transmitting bomb: action=0x%02X, x=%d, y=%d", action, x, y);
     subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer, RX_TX_BUFFER_SIZE);
 }
 

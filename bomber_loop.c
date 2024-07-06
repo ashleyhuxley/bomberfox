@@ -134,6 +134,9 @@ static bool handle_game_input(BomberAppState* state, InputEvent input)
                 player->bombs[state->bomb_ix] = bomb;
 
                 state->bomb_ix = (state->bomb_ix + 1) % 10;
+
+                tx_bomb_placement(state, bomb.x, bomb.y);
+
                 return true;
             case InputKeyUp:
             case InputKeyDown:
@@ -232,6 +235,28 @@ void bomber_main_loop(BomberAppState* state)
     }
 }
 
+static bool destroy_block(BomberAppState* state, uint8_t x, uint8_t y)
+{
+    // Out of bounds.
+    // No need to check negatives as uint8_t is unsigned and will underflow, resulting in a value way over MAX_X and MAX_Y.
+    if (x >= MAX_X || y >= MAX_Y)
+    {
+        return false;
+    }
+
+    // TODO: Check for player hit
+
+
+    switch(state->level[ix(x, y)])
+    {
+        case BlockType_Brick:
+            state->level[ix(x, y)] = BlockType_Empty;
+            return true;
+        default:
+            return false;
+    }
+}
+
 static bool update_bombs(Player* player, BomberAppState* state)
 {
     bool changed = false;
@@ -256,35 +281,10 @@ static bool update_bombs(Player* player, BomberAppState* state)
 
                 for (uint8_t j = 0; j < player->bomb_power + 1; j++)
                 {
-                    uint8_t bx, by;
-
-                    bx = bomb->x - j;
-                    by = bomb->y;
-                    if (bx < MAX_X) {
-                        changed = true;
-                        state->level[ix(bx, by)] = BlockType_Empty;
-                    }
-
-                    bx = bomb->x + j;
-                    by = bomb->y;
-                    if (bx < MAX_X) {
-                        changed = true;
-                        state->level[ix(bx, by)] = BlockType_Empty;
-                    }
-
-                    bx = bomb->x;
-                    by = bomb->y - j;
-                    if (by < MAX_Y) {
-                        changed = true;
-                        state->level[ix(bx, by)] = BlockType_Empty;
-                    }
-
-                    bx = bomb->x;
-                    by = bomb->y + j;
-                    if (by < MAX_Y) {
-                        changed = true;
-                        state->level[ix(bx, by)] = BlockType_Empty;
-                    }
+                    changed &= destroy_block(state, bomb->x - j, bomb->y);
+                    changed &= destroy_block(state, bomb->x + j, bomb->y);
+                    changed &= destroy_block(state, bomb->x, bomb->y + j);
+                    changed &= destroy_block(state, bomb->x, bomb->y - j);
                 }
 
                 continue;
