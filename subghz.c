@@ -11,9 +11,7 @@
 // Transmit player position to other flipper
 // player: Pointer to the current player structure
 // state: Pointer to the game state
-void tx_new_position(Player* player, BomberAppState* state)
-// Hot Take: App state should always be first
-{
+void tx_new_position(BomberAppState* state, Player* player) {
     furi_assert(state);
     furi_assert(player);
 
