@@ -7,6 +7,7 @@
 
 void tx_new_position(Player* player, BomberAppState* state);
 void tx_bomb_placement(BomberAppState* state, uint8_t x, uint8_t y);
+void tx_death(BomberAppState* state);
 void subghz_check_incoming(BomberAppState* state);
 void have_read_cb(void* context);
 
