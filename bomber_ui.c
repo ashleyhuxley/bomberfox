@@ -45,7 +45,7 @@ static void draw_block(Canvas* canvas, int x, int y, BlockType block)
 static void render_game(Canvas* canvas, BomberAppState* state)
 {
     // Draw bombs
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < MAX_BOMBS; i++)
     {
         draw_bomb(canvas, state->fox.bombs[i]);
         draw_bomb(canvas, state->wolf.bombs[i]);

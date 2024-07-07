@@ -41,7 +41,7 @@ static void bomber_app_start(BomberAppState* state)
 // Check if a particular coordingate is occupied by a players active bomb
 static bool is_occupied_by_bomb(Player* player, uint8_t x, uint8_t y)
 {
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < MAX_BOMBS; i++)
     {
         Bomb bomb = player->bombs[i];
         if (bomb.state != BombState_None && bomb.x == x && bomb.y == y)
@@ -283,7 +283,7 @@ static bool update_bombs(Player* player, BomberAppState* state)
 {
     bool changed = false;
 
-    for (uint8_t i = 0; i < 10; i++)
+    for (uint8_t i = 0; i < MAX_BOMBS; i++)
     {
         Bomb* bomb = &player->bombs[i];
         if (bomb->state != BombState_None)

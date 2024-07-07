@@ -10,8 +10,9 @@
 
 #define TAG "bomb"
 #define LOOP_MESSAGE_TIMEOUT_ms 500
-#define DEFAULT_FREQ 433920000
-#define RX_TX_BUFFER_SIZE 3
+#define DEFAULT_FREQ            433920000
+#define RX_TX_BUFFER_SIZE       3
+#define MAX_BOMBS               10
 
 // Graphics
 static const uint8_t brick_glyph[]  = { 0xff, 0x11, 0xff, 0x88, 0xff, 0x11, 0xff, 0x88 };
@@ -61,7 +62,7 @@ typedef struct {
 typedef struct {
     uint8_t x;
     uint8_t y;
-    Bomb bombs[10];                     // Array of bombs
+    Bomb bombs[MAX_BOMBS];              // Array of bombs
     uint8_t bomb_power;                 // Number of blocks a bomb will destroy
     uint8_t bomb_ix;                    // Index of currently held bomb
     uint8_t bomb_count;                 // How many bombs the player can use
