@@ -64,6 +64,7 @@ typedef struct {
     Bomb bombs[10];                     // Array of bombs
     uint8_t bomb_power;                 // Number of blocks a bomb will destroy
     uint8_t bomb_ix;                    // Index of currently held bomb
+    uint8_t bomb_count;                 // How many bombs the player can use
 } Player;
 
 // Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
@@ -102,7 +103,6 @@ typedef struct {
     bool running;                       
     Player fox;                         // Position of the fox
     Player wolf;                        // Position of the wolf
-    int bomb_ix;                        // Index of current bomb for current player
     bool isPlayerTwo;
 
     // for Sub-GHz

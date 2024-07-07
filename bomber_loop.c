@@ -153,9 +153,9 @@ static bool handle_game_input(BomberAppState* state, InputEvent input)
                 bomb.y = player->y;
                 bomb.state = BombState_Planted;
                 bomb.planted = furi_get_tick();
-                player->bombs[state->bomb_ix] = bomb;
+                player->bombs[player->bomb_ix] = bomb;
 
-                state->bomb_ix = (state->bomb_ix + 1) % 10;
+                player->bomb_ix = (player->bomb_ix + 1) % 10;
 
                 tx_bomb_placement(state, bomb.x, bomb.y);
 

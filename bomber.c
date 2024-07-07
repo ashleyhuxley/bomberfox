@@ -86,8 +86,6 @@ bool bomber_app_init()
 
     furi_timer_start(state->timer, furi_ms_to_ticks(50));
 
-    state->bomb_ix = 0;
-
     // Init UI
     state->view_port = view_port_alloc();
     if (!state->view_port)
