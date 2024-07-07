@@ -66,10 +66,20 @@ static void post_rx(BomberAppState* state, size_t rx_size)
     FURI_LOG_T(TAG, "Received data size: %zu", rx_size);
     FURI_LOG_T(TAG, "Received data: 0x%02X 0x%12X 0x%22X", state->rx_buffer[0], state->rx_buffer[1], state->rx_buffer[2]);
 
-    // TODO: Handle other actions
-    Player* player = (state->rx_buffer[0] > 0x10) ? &state->wolf : &state->fox;
-    player->x = state->rx_buffer[1];
-    player->y = state->rx_buffer[2];
+    Player* player = (state->rx_buffer[0] > PLAYER_TWO) ? &state->wolf : &state->fox;
+
+    if ((state->rx_buffer[0] & ACTION_MOVE) == ACTION_MOVE)
+    {
+        player->x = state->rx_buffer[1];
+        player->y = state->rx_buffer[2];
+    }
+    else if ((state->rx_buffer[0] & ACTION_BOMB) == ACTION_BOMB)
+    {
+        player->bombs[player->bomb_ix].planted = furi_get_tick();
+        player->bombs[player->bomb_ix].state = BombState_Planted;
+        player->bomb_ix = (player->bomb_ix + 1) % 10;
+    }
+
     view_port_update(state->view_port);
 }
 

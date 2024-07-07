@@ -63,6 +63,7 @@ typedef struct {
     uint8_t y;
     Bomb bombs[10];                     // Array of bombs
     uint8_t bomb_power;                 // Number of blocks a bomb will destroy
+    uint8_t bomb_ix;                    // Index of currently held bomb
 } Player;
 
 // Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
