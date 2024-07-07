@@ -38,6 +38,21 @@ static void bomber_app_start(BomberAppState* state)
     bomber_app_set_mode(state, BomberAppMode_Playing);
 }
 
+// Check if a particular coordingate is occupied by a players active bomb
+static bool is_occupied_by_bomb(Player* player, uint8_t x, uint8_t y)
+{
+    for(int i = 0; i < 10; i++)
+    {
+        Bomb bomb = player->bombs[i];
+        if (bomb.state != BombState_None && bomb.x == x && bomb.y == y)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // Handle direction keys to move the player around
 // state: Pointer to the application state
 // input: Represents the input event
@@ -72,17 +87,24 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input)
 
     // Only allow move to new position if the block at that position is not occupied
     BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
-    if (block == BlockType_Empty)
+    if (block != BlockType_Empty)
     {
-        player->x = newPoint.x;
-        player->y = newPoint.y;
-
-        tx_new_position(player, state);
-
-        return true;
+        return false;
     }
 
-    return false;
+    if (
+        is_occupied_by_bomb(&state->fox, newPoint.x, newPoint.y) || 
+        is_occupied_by_bomb(&state->wolf, newPoint.x, newPoint.y))
+    {
+        return false;
+    }
+
+    player->x = newPoint.x;
+    player->y = newPoint.y;
+
+    tx_new_position(player, state);
+
+    return true;
 }
 
 // Handles input while on player select screen - just switch between Fox/Wolf
