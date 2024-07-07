@@ -1,8 +1,8 @@
 #include "subghz.h"
 #include "types.h"
 
-#define ACTION_MOVE 0x00
-#define ACTION_BOMB 0x01
+#define ACTION_MOVE 0x01
+#define ACTION_BOMB 0x02
 
 #define PLAYER_TWO 0x10
 
@@ -64,17 +64,27 @@ static void post_rx(BomberAppState* state, size_t rx_size)
     // Ensure received size is within buffer limits
     furi_check(rx_size <= RX_TX_BUFFER_SIZE);
     FURI_LOG_T(TAG, "Received data size: %zu", rx_size);
-    FURI_LOG_T(TAG, "Received data: 0x%02X 0x%12X 0x%22X", state->rx_buffer[0], state->rx_buffer[1], state->rx_buffer[2]);
+    FURI_LOG_D(TAG, "Received data: 0x%02X 0x%12X 0x%22X", state->rx_buffer[0], state->rx_buffer[1], state->rx_buffer[2]);
 
-    Player* player = (state->rx_buffer[0] > PLAYER_TWO) ? &state->wolf : &state->fox;
+    Player* player = &state->fox;
+    if (state->rx_buffer[0] >= PLAYER_TWO)
+    {
+        player = &state->wolf;
+        state->rx_buffer[0] -= PLAYER_TWO;
+    }
 
-    if ((state->rx_buffer[0] & ACTION_MOVE) == ACTION_MOVE)
+    if (state->rx_buffer[0] == ACTION_MOVE)
     {
         player->x = state->rx_buffer[1];
         player->y = state->rx_buffer[2];
     }
-    else if ((state->rx_buffer[0] & ACTION_BOMB) == ACTION_BOMB)
+    else if (state->rx_buffer[0] == ACTION_BOMB)
     {
+        FURI_LOG_T(TAG, "Hostile bomb at index %zu", player->bomb_ix);
+
+        player->bombs[player->bomb_ix].x = state->rx_buffer[1];
+        player->bombs[player->bomb_ix].y = state->rx_buffer[2];
+        
         player->bombs[player->bomb_ix].planted = furi_get_tick();
         player->bombs[player->bomb_ix].state = BombState_Planted;
         player->bomb_ix = (player->bomb_ix + 1) % 10;
