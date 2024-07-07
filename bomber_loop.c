@@ -90,7 +90,7 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input) {
     player->x = newPoint.x;
     player->y = newPoint.y;
 
-    tx_new_position(player, state);
+    tx_new_position(state, player);
 
     return true;
 }
