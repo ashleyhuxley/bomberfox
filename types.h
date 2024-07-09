@@ -13,6 +13,7 @@
 #define DEFAULT_FREQ 433920000
 #define RX_TX_BUFFER_SIZE 3
 #define MAX_BOMBS 10
+#define LEVEL_SIZE 128
 
 // Graphics
 static const uint8_t brick_glyph[] = {0xff, 0x11, 0xff, 0x88, 0xff, 0x11, 0xff, 0x88};
