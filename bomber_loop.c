@@ -204,6 +204,9 @@ void bomber_main_loop(BomberAppState* state) {
             case BomberEventType_Input:
                 updated = bomber_app_handle_input(state, event.input);
                 break;
+            case BomberEventType_Tick:
+                updated = bomber_game_tick(state);
+                break;
             default:
                 FURI_LOG_E(TAG, "Unknown event received from queue.");
                 break;
@@ -295,12 +298,10 @@ static bool update_bombs(Player* player, BomberAppState* state) {
     return changed;
 }
 
-void bomber_game_tick(BomberAppState* state) {
+bool bomber_game_tick(BomberAppState* state) {
     bool changed = false;
     changed &= update_bombs(&state->fox, state);
     changed &= update_bombs(&state->wolf, state);
 
-    if(changed) {
-        view_port_update(state->view_port);
-    }
+    return changed;
 }
