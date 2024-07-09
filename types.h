@@ -96,7 +96,6 @@ typedef enum {
 // Event types for message queue
 typedef enum {
     BomberEventType_Input,
-    BomberEventType_InfraredMessage,
     BomberEventType_Tick,
 } BomberEventType;
 

@@ -4,6 +4,6 @@
 #include "types.h"
 
 void bomber_main_loop(BomberAppState* state);
-void bomber_game_tick(BomberAppState* state);
+bool bomber_game_tick(BomberAppState* state);
 
 #endif

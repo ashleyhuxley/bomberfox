@@ -104,7 +104,13 @@ bool bomber_app_init()
 
 void bomber_game_update_timer_callback()
 {
-    bomber_game_tick(state);
+    FURI_LOG_T(TAG, "bomber_game_timer_callback");
+
+    BomberEvent event = {.type = BomberEventType_Tick };
+
+    if(furi_message_queue_put(state->queue, &event, FuriWaitForever) != FuriStatusOk) {
+        FURI_LOG_W(TAG, "Failed to put input event in message queue");
+    }
 }
 
 void bomber_app_destroy()
