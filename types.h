@@ -97,12 +97,13 @@ typedef enum {
 typedef enum {
     BomberEventType_Input,
     BomberEventType_Tick,
+    BomberEventType_SubGhz
 } BomberEventType;
 
 typedef struct {
     BomberEventType type;
-    //InfraredMessage* ir_message;
     InputEvent input;
+    size_t subGhzIncomingSize;
 } BomberEvent;
 
 typedef enum { WhoDied_None, WhoDied_Fox, WhoDied_Wolf } WhoDied;

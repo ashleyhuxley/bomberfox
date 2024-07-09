@@ -63,7 +63,7 @@ void tx_death(BomberAppState* state) {
 // Handle the buffer once data receive has completed
 // state: Pointer to the application state
 // rx_size: Number of bytes of data received
-static void post_rx(BomberAppState* state, size_t rx_size) {
+void bomber_game_post_rx(BomberAppState* state, size_t rx_size) {
     furi_assert(state);
     furi_assert(rx_size);
 
@@ -112,8 +112,6 @@ static void post_rx(BomberAppState* state, size_t rx_size) {
         }
         break;
     }
-
-    view_port_update(state->view_port);
 }
 
 // Handle incoming subghz data
@@ -132,7 +130,12 @@ void subghz_check_incoming(BomberAppState* state) {
 
         size_t rx_size =
             subghz_tx_rx_worker_read(state->subghz_worker, state->rx_buffer, RX_TX_BUFFER_SIZE);
-        post_rx(state, rx_size);
+        
+        BomberEvent event = {.type = BomberEventType_SubGhz, .subGhzIncomingSize = rx_size };
+
+        if(furi_message_queue_put(state->queue, &event, FuriWaitForever) != FuriStatusOk) {
+            FURI_LOG_W(TAG, "Failed to put timer event in message queue");
+        }
     }
 }
 

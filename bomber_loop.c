@@ -207,6 +207,10 @@ void bomber_main_loop(BomberAppState* state) {
             case BomberEventType_Tick:
                 updated = bomber_game_tick(state);
                 break;
+            case BomberEventType_SubGhz:
+                bomber_game_post_rx(state, event.subGhzIncomingSize);
+                updated = true;
+                break;
             default:
                 FURI_LOG_E(TAG, "Unknown event received from queue.");
                 break;
