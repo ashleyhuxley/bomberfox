@@ -104,7 +104,7 @@ bool bomber_app_init()
 
 void bomber_game_update_timer_callback()
 {
-    FURI_LOG_T(TAG, "bomber_game_timer_callback");
+    FURI_LOG_T(TAG, "Timer Callback");
 
     BomberEvent event = {.type = BomberEventType_Tick };
 
