@@ -28,6 +28,8 @@ static void draw_player(Canvas* canvas, int x, int y, const uint8_t* glyph) {
 static void draw_block(Canvas* canvas, int x, int y, BlockType block) {
     switch(block) {
     case BlockType_Brick:
+    case BlockType_PuBombStrength_Hidden:
+    case BlockType_PuExtraBomb_Hidden:
         canvas_draw_xbm(canvas, x * 8, y * 8, 8, 8, brick_glyph);
         break;
     case BlockType_PuBombStrength:

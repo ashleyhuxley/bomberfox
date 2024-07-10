@@ -261,6 +261,12 @@ static bool handle_explosion(BomberAppState* state, uint8_t x, uint8_t y) {
     case BlockType_Brick:
         state->level[ix(x, y)] = BlockType_Empty;
         return true;
+    case BlockType_PuBombStrength_Hidden:
+        state->level[ix(x, y)] = BlockType_PuBombStrength;
+        return true;
+    case BlockType_PuExtraBomb_Hidden:
+        state->level[ix(x, y)] = BlockType_PuExtraBomb;
+        return true;
     default:
         return false;
     }

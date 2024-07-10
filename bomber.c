@@ -197,10 +197,10 @@ int32_t bomber_main(void* p)
     get_random_powerup_locations(state->level, powerup_power_count, power_powerups);
 
     for (uint8_t i = 0; i < powerup_bomb_count; i++) {
-        state->level[bomb_powerups[i]] = BlockType_PuExtraBomb;;
+        state->level[bomb_powerups[i]] = BlockType_PuExtraBomb_Hidden;
     }
     for (uint8_t i = 0; i < powerup_power_count; i++) {
-        state->level[power_powerups[i]] = BlockType_PuBombStrength;;
+        state->level[power_powerups[i]] = BlockType_PuBombStrength_Hidden;
     }
 
     free(bomb_powerups);

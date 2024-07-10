@@ -53,7 +53,9 @@ typedef enum BlockType {
     BlockType_Fox = 3,
     BlockType_Wolf = 4,
     BlockType_PuExtraBomb = 5,
-    BlockType_PuBombStrength = 6
+    BlockType_PuBombStrength = 6,
+    BlockType_PuExtraBomb_Hidden = 7,
+    BlockType_PuBombStrength_Hidden = 8
 } BlockType;
 
 // Possible states a bomb can be in
