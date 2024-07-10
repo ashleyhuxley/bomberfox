@@ -84,7 +84,7 @@ bool bomber_app_init()
 
     subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device, state->frequency);
 
-    furi_timer_start(state->timer, furi_ms_to_ticks(50));
+    furi_timer_start(state->timer, furi_ms_to_ticks(25));
 
     // Init UI
     state->view_port = view_port_alloc();
@@ -185,6 +185,26 @@ int32_t bomber_main(void* p)
 
     // TODO: This should be moved to after the menu
     state->level = level1;
+    uint8_t wall_count = count_walls(state->level);
+    uint8_t powerup_bomb_count = (uint8_t)round((POWERUP_EXTRABOMB_RATIO * wall_count));
+    uint8_t powerup_power_count = (uint8_t)round((POWERUP_BOMBPOWER_RATIO * wall_count));
+    FURI_LOG_D(TAG, "Walls: %d, Extra Bombs: %d, Bomb Power: %d", wall_count, powerup_bomb_count, powerup_power_count);
+
+    uint8_t* bomb_powerups = malloc(sizeof(uint8_t) * powerup_bomb_count);
+    uint8_t* power_powerups = malloc(sizeof(uint8_t) * powerup_power_count);
+
+    get_random_powerup_locations(state->level, powerup_bomb_count, bomb_powerups);
+    get_random_powerup_locations(state->level, powerup_power_count, power_powerups);
+
+    for (uint8_t i = 0; i < powerup_bomb_count; i++) {
+        state->level[bomb_powerups[i]] = BlockType_PuExtraBomb;;
+    }
+    for (uint8_t i = 0; i < powerup_power_count; i++) {
+        state->level[power_powerups[i]] = BlockType_PuBombStrength;;
+    }
+
+    free(bomb_powerups);
+    free(power_powerups);
 
     // Figure out player starting positions from level data
     state->fox = bomber_app_get_block(state->level, BlockType_Fox);

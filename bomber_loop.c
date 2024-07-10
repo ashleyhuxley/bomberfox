@@ -198,16 +198,18 @@ void bomber_main_loop(BomberAppState* state) {
 
         switch(furi_message_queue_get(state->queue, &event, LOOP_MESSAGE_TIMEOUT_ms)) {
         case FuriStatusOk:
-            FURI_LOG_I(TAG, "Event from queue: %d", event.type);
             bool updated = false;
             switch(event.type) {
             case BomberEventType_Input:
+                FURI_LOG_T(TAG, "Input Event from queue");
                 updated = bomber_app_handle_input(state, event.input);
                 break;
             case BomberEventType_Tick:
+                FURI_LOG_T(TAG, "Tick Event from queue");
                 updated = bomber_game_tick(state);
                 break;
             case BomberEventType_SubGhz:
+                FURI_LOG_I(TAG, "SubGhz Event from queue");
                 bomber_game_post_rx(state, event.subGhzIncomingSize);
                 updated = true;
                 break;

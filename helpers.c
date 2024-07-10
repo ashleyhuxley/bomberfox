@@ -3,14 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <furi.h>
 
 // Function to count the number of walls in a given level
 uint8_t count_walls(uint8_t level[])
 {
-    int brickCount = 0;
-    for (int i = 0; i < LEVEL_SIZE; i++) {
+    uint8_t brickCount = 0;
+    for (uint8_t i = 0; i < LEVEL_SIZE; i++) {
         if (level[i] == BlockType_Brick) {
             brickCount++;
         }
@@ -19,11 +18,11 @@ uint8_t count_walls(uint8_t level[])
     return brickCount;
 }
 
-// Function to select n random elements of type BlockType_Brick from an array
-void get_random_powerup_locations(uint8_t level[], int n, BlockType *output) {
+// Function to select (n) random walls from the level data. Returns the indicies in the output array
+void get_random_powerup_locations(uint8_t level[], int n, uint8_t output[]) {
     uint8_t brickCount = count_walls(level);
 
-    srand(time(NULL));
+    srand(furi_get_tick());
 
     // Store the indices of all BlockType_Brick elements
     uint8_t *brickIndices = (uint8_t *)malloc(brickCount * sizeof(uint8_t));
@@ -32,24 +31,24 @@ void get_random_powerup_locations(uint8_t level[], int n, BlockType *output) {
         return;
     }
 
-    int index = 0;
-    for (int i = 0; i < LEVEL_SIZE; i++) {
+    uint8_t index = 0;
+    for (uint8_t i = 0; i < LEVEL_SIZE; i++) {
         if (level[i] == BlockType_Brick) {
             brickIndices[index++] = i;
         }
     }
 
     // Fisher-Yates shuffle algorithm to shuffle the brickIndices array
-    for (int i = brickCount - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        int temp = brickIndices[i];
+    for (uint8_t i = brickCount - 1; i > 0; i--) {
+        uint8_t j = rand() % (i + 1);
+        uint8_t temp = brickIndices[i];
         brickIndices[i] = brickIndices[j];
         brickIndices[j] = temp;
     }
 
     // Copy the first n elements from the shuffled brickIndices to the output array
-    for (int i = 0; i < n; i++) {
-        output[i] = level[brickIndices[i]];
+    for (uint8_t i = 0; i < n; i++) {
+        output[i] = brickIndices[i];
     }
 
     free(brickIndices);
