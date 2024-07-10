@@ -78,13 +78,21 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input) {
 
     // Only allow move to new position if the block at that position is not occupied
     BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
-    if(block != BlockType_Empty) {
+    if(block == BlockType_Brick || block == BlockType_PuBombStrength_Hidden || block == BlockType_PuExtraBomb_Hidden) {
         return false;
     }
 
     if(is_occupied_by_bomb(&state->fox, newPoint.x, newPoint.y) ||
        is_occupied_by_bomb(&state->wolf, newPoint.x, newPoint.y)) {
         return false;
+    }
+
+    if (block == BlockType_PuBombStrength) {
+        player->bomb_power++;
+        state->level[ix(newPoint.x, newPoint.y)] = BlockType_Empty;
+    } else if (block == BlockType_PuExtraBomb) {
+        player->bomb_count++;
+        state->level[ix(newPoint.x, newPoint.y)] = BlockType_Empty;
     }
 
     player->x = newPoint.x;
