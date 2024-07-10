@@ -9,7 +9,7 @@
 #include <lib/subghz/subghz_tx_rx_worker.h>
 
 #define TAG "bomb"
-#define LOOP_MESSAGE_TIMEOUT_ms 30
+#define LOOP_MESSAGE_TIMEOUT_ms 500
 #define DEFAULT_FREQ 433920000
 #define RX_TX_BUFFER_SIZE 3
 #define MAX_BOMBS 10
