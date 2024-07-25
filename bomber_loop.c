@@ -78,13 +78,21 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input) {
 
     // Only allow move to new position if the block at that position is not occupied
     BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
-    if(block != BlockType_Empty) {
+    if(block == BlockType_Brick || block == BlockType_PuBombStrength_Hidden || block == BlockType_PuExtraBomb_Hidden) {
         return false;
     }
 
     if(is_occupied_by_bomb(&state->fox, newPoint.x, newPoint.y) ||
        is_occupied_by_bomb(&state->wolf, newPoint.x, newPoint.y)) {
         return false;
+    }
+
+    if (block == BlockType_PuBombStrength) {
+        player->bomb_power++;
+        state->level[ix(newPoint.x, newPoint.y)] = BlockType_Empty;
+    } else if (block == BlockType_PuExtraBomb) {
+        player->bomb_count++;
+        state->level[ix(newPoint.x, newPoint.y)] = BlockType_Empty;
     }
 
     player->x = newPoint.x;
@@ -198,16 +206,18 @@ void bomber_main_loop(BomberAppState* state) {
 
         switch(furi_message_queue_get(state->queue, &event, LOOP_MESSAGE_TIMEOUT_ms)) {
         case FuriStatusOk:
-            FURI_LOG_I(TAG, "Event from queue: %d", event.type);
             bool updated = false;
             switch(event.type) {
             case BomberEventType_Input:
+                FURI_LOG_T(TAG, "Input Event from queue");
                 updated = bomber_app_handle_input(state, event.input);
                 break;
             case BomberEventType_Tick:
+                FURI_LOG_T(TAG, "Tick Event from queue");
                 updated = bomber_game_tick(state);
                 break;
             case BomberEventType_SubGhz:
+                FURI_LOG_I(TAG, "SubGhz Event from queue");
                 bomber_game_post_rx(state, event.subGhzIncomingSize);
                 updated = true;
                 break;
@@ -258,6 +268,12 @@ static bool handle_explosion(BomberAppState* state, uint8_t x, uint8_t y) {
     switch(state->level[ix(x, y)]) {
     case BlockType_Brick:
         state->level[ix(x, y)] = BlockType_Empty;
+        return true;
+    case BlockType_PuBombStrength_Hidden:
+        state->level[ix(x, y)] = BlockType_PuBombStrength;
+        return true;
+    case BlockType_PuExtraBomb_Hidden:
+        state->level[ix(x, y)] = BlockType_PuExtraBomb;
         return true;
     default:
         return false;

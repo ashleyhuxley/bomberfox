@@ -1,6 +1,59 @@
 #include "helpers.h"
 #include "types.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <furi.h>
+
+// Function to count the number of walls in a given level
+uint8_t count_walls(uint8_t level[])
+{
+    uint8_t brickCount = 0;
+    for (uint8_t i = 0; i < LEVEL_SIZE; i++) {
+        if (level[i] == BlockType_Brick) {
+            brickCount++;
+        }
+    }
+
+    return brickCount;
+}
+
+// Function to select (n) random walls from the level data. Returns the indicies in the output array
+void get_random_powerup_locations(uint8_t level[], int n, uint8_t output[]) {
+    uint8_t brickCount = count_walls(level);
+
+    srand(furi_get_tick());
+
+    // Store the indices of all BlockType_Brick elements
+    uint8_t *brickIndices = (uint8_t *)malloc(brickCount * sizeof(uint8_t));
+    if (brickIndices == NULL) {
+        FURI_LOG_E(TAG, "Memory allocation failed.");
+        return;
+    }
+
+    uint8_t index = 0;
+    for (uint8_t i = 0; i < LEVEL_SIZE; i++) {
+        if (level[i] == BlockType_Brick) {
+            brickIndices[index++] = i;
+        }
+    }
+
+    // Fisher-Yates shuffle algorithm to shuffle the brickIndices array
+    for (uint8_t i = brickCount - 1; i > 0; i--) {
+        uint8_t j = rand() % (i + 1);
+        uint8_t temp = brickIndices[i];
+        brickIndices[i] = brickIndices[j];
+        brickIndices[j] = temp;
+    }
+
+    // Copy the first n elements from the shuffled brickIndices to the output array
+    for (uint8_t i = 0; i < n; i++) {
+        output[i] = brickIndices[i];
+    }
+
+    free(brickIndices);
+}
+
 // Extracts the starting location of the player from the level data
 // Returns the player's position if found, otherwise returns a default position (0,0)
 Player bomber_app_get_block(uint8_t level[], BlockType blockType)
