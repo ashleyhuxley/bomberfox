@@ -92,6 +92,9 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input) {
         state->level[ix(newPoint.x, newPoint.y)] = BlockType_Empty;
     } else if (block == BlockType_PuExtraBomb) {
         player->bomb_count++;
+        if (player->bomb_count == MAX_BOMBS) {
+            player->bomb_count = MAX_BOMBS;
+        }
         state->level[ix(newPoint.x, newPoint.y)] = BlockType_Empty;
     }
 
@@ -138,16 +141,20 @@ static bool handle_game_input(BomberAppState* state, InputEvent input) {
         case InputKeyOk:
             FURI_LOG_I(TAG, "Drop Bomb");
 
-            Bomb bomb;
-            bomb.x = player->x;
-            bomb.y = player->y;
-            bomb.state = BombState_Planted;
-            bomb.planted = furi_get_tick();
-            player->bombs[player->bomb_ix] = bomb;
+            for (int i = 0; i < player->bomb_count; i++) {
+                if (player->bombs[i].state == BombState_None) {
+                    Bomb bomb;
+                    bomb.x = player->x;
+                    bomb.y = player->y;
+                    bomb.state = BombState_Planted;
+                    bomb.planted = furi_get_tick();
 
-            player->bomb_ix = (player->bomb_ix + 1) % 10;
+                    player->bombs[i] = bomb;
 
-            tx_bomb_placement(state, bomb.x, bomb.y);
+                    tx_bomb_placement(state, bomb.x, bomb.y);
+                    break;
+                }
+            }
 
             return true;
         case InputKeyUp:
