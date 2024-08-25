@@ -69,8 +69,8 @@ static void render_game(Canvas* canvas, BomberAppState* state) {
     }
 }
 
-// Renders the menu to the viewport - called while in the menu
-static void render_menu(Canvas* canvas, BomberAppState* state) {
+// Renders the player select menu to the viewport - called while in the player select menu
+static void render_player_select(Canvas* canvas, BomberAppState* state) {
     uint8_t ax = state->isPlayerTwo ? 70 : 20;
 
     canvas_set_font(canvas, FontSecondary);
@@ -158,8 +158,8 @@ void bomber_ui_render_callback(Canvas* canvas, void* context) {
     case BomberAppMode_Playing:
         render_game(canvas, state);
         break;
-    case BomberAppMode_Menu:
-        render_menu(canvas, state);
+    case BomberAppMode_PlayerSelect:
+        render_player_select(canvas, state);
         break;
     case BomberAppMode_LevelSelect:
         render_level_select(canvas, state);

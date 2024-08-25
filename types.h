@@ -92,7 +92,7 @@ typedef struct {
 typedef enum {
     BomberAppMode_Uninitialised,
     BomberAppMode_LevelSelect,
-    BomberAppMode_Menu,
+    BomberAppMode_PlayerSelect,
     BomberAppMode_Ready,
     BomberAppMode_Playing,
     BomberAppMode_Finished,

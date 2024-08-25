@@ -115,7 +115,7 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input) {
 // state: Pointer to the application state
 // input: Represents the input event
 // returns: true if the viewport should be updated, else false
-static bool handle_menu_input(BomberAppState* state, InputEvent input) {
+static bool handle_player_select_input(BomberAppState* state, InputEvent input) {
     if(input.type == InputTypeShort) {
         switch(input.key) {
         case InputKeyUp:
@@ -231,8 +231,8 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input) {
     switch(state->mode) {
     case BomberAppMode_Playing:
         return handle_game_input(state, input);
-    case BomberAppMode_Menu:
-        return handle_menu_input(state, input);
+    case BomberAppMode_PlayerSelect:
+        return handle_player_select_input(state, input);
     case BomberAppMode_LevelSelect:
         return handle_levelselect_input(state, input);
     default:

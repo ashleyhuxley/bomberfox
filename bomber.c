@@ -181,9 +181,9 @@ int32_t bomber_main(void* p)
         return 1;
     }
 
-    bomber_app_set_mode(state, BomberAppMode_Menu);
+    bomber_app_set_mode(state, BomberAppMode_PlayerSelect);
 
-    // TODO: This should be moved to after the menu
+    // TODO: This should be moved to after the Player Select menu
     state->selectedLevel = 0;
     state->level = level1;
     uint8_t wall_count = count_walls(state->level);
