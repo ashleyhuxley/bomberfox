@@ -91,7 +91,7 @@ typedef struct {
 // Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
 typedef enum {
     BomberAppMode_Uninitialised,
-    BomberAppMode_Menu,
+    BomberAppMode_PlayerSelect,
     BomberAppMode_Ready,
     BomberAppMode_Playing,
     BomberAppMode_Finished,
