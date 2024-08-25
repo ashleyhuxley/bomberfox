@@ -91,6 +91,7 @@ typedef struct {
 // Application mode. Rendering and input handlers rely on this to know what to render, or how to handle input.
 typedef enum {
     BomberAppMode_Uninitialised,
+    BomberAppMode_LevelSelect,
     BomberAppMode_Menu,
     BomberAppMode_Ready,
     BomberAppMode_Playing,
@@ -128,6 +129,7 @@ typedef struct {
     Player fox; // Position of the fox
     Player wolf; // Position of the wolf
     bool isPlayerTwo;
+    uint8_t selectedLevel;
 
     WhoDied dead;
 

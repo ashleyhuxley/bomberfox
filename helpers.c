@@ -111,3 +111,9 @@ void bomber_app_set_mode(BomberAppState* state, BomberAppMode mode)
     state->mode = mode;
     furi_mutex_release(state->data_mutex);
 }
+
+bool is_solid_block(BlockType type) {
+    return type == BlockType_Brick ||
+           type == BlockType_PuBombStrength_Hidden ||
+           type == BlockType_PuExtraBomb_Hidden;
+}

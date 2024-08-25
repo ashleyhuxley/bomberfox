@@ -184,6 +184,7 @@ int32_t bomber_main(void* p)
     bomber_app_set_mode(state, BomberAppMode_Menu);
 
     // TODO: This should be moved to after the menu
+    state->selectedLevel = 0;
     state->level = level1;
     uint8_t wall_count = count_walls(state->level);
     uint8_t powerup_bomb_count = (uint8_t)round((POWERUP_EXTRABOMB_RATIO * wall_count));

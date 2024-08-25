@@ -34,6 +34,11 @@ static void bomber_app_start(BomberAppState* state) {
     bomber_app_set_mode(state, BomberAppMode_Playing);
 }
 
+static void bomber_app_select_level(BomberAppState* state) {
+    FURI_LOG_I(TAG, "Select Level");
+    bomber_app_set_mode(state, BomberAppMode_LevelSelect);
+}
+
 // Check if a particular coordingate is occupied by a players active bomb
 static bool is_occupied_by_bomb(Player* player, uint8_t x, uint8_t y) {
     for(int i = 0; i < MAX_BOMBS; i++) {
@@ -120,13 +125,50 @@ static bool handle_menu_input(BomberAppState* state, InputEvent input) {
             state->isPlayerTwo = !state->isPlayerTwo;
             return true;
         case InputKeyOk:
-            bomber_app_start(state);
+            if (!state->isPlayerTwo) {
+                bomber_app_select_level(state);
+            } else {
+                bomber_app_start(state);
+            }
             return true;
         default:
             return false;
         }
     }
     return false;
+}
+
+static bool handle_levelselect_input(BomberAppState* state, InputEvent input) {
+    if(input.type == InputTypeShort) {
+        switch(input.key) {
+            case InputKeyOk:
+                bomber_app_start(state);
+                return true;
+            case InputKeyUp:
+                state->selectedLevel -= 2;
+                break;
+            case InputKeyDown:
+                state->selectedLevel += 2;
+                break;
+            case InputKeyLeft:
+                state->selectedLevel -= 1;
+                break;
+            case InputKeyRight:
+                state->selectedLevel += 1;
+                break;
+            default:
+                return false;
+        }
+    }
+
+    if (state->selectedLevel <= 0) {
+        state->selectedLevel = 0;
+    }
+    if (state->selectedLevel >= 4) {
+        state->selectedLevel = 3;
+    }
+
+    return true;
 }
 
 // Handle input while playing the game
@@ -191,6 +233,8 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input) {
         return handle_game_input(state, input);
     case BomberAppMode_Menu:
         return handle_menu_input(state, input);
+    case BomberAppMode_LevelSelect:
+        return handle_levelselect_input(state, input);
     default:
         break;
     }
