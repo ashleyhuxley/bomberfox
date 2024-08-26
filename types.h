@@ -93,6 +93,7 @@ typedef enum {
     BomberAppMode_Uninitialised,
     BomberAppMode_LevelSelect,
     BomberAppMode_PlayerSelect,
+    BomberAppMode_Waiting,
     BomberAppMode_Ready,
     BomberAppMode_Playing,
     BomberAppMode_Finished,
@@ -101,11 +102,17 @@ typedef enum {
     BomberAppMode_Quit
 } BomberAppMode;
 
+typedef enum {
+    RxMode_Command,
+    RxMode_LevelData
+} RxMode;
+
 // Event types for message queue
 typedef enum {
     BomberEventType_Input,
     BomberEventType_Tick,
-    BomberEventType_SubGhz
+    BomberEventType_SubGhz,
+    BomberEventType_HaveLevelData
 } BomberEventType;
 
 typedef struct {
@@ -140,6 +147,8 @@ typedef struct {
     volatile uint32_t last_time_rx_data;
     uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
     uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
+    uint8_t levelData[128];
+    RxMode rxMode;
 } BomberAppState;
 
 #endif

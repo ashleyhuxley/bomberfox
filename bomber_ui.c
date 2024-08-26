@@ -94,45 +94,48 @@ static void render_level_preview(Canvas* canvas, uint8_t offset_x, uint8_t offse
     }
 }
 
+//uint8_t my_itoa( char *s, uint8_t n )
+//{
+//    const unsigned base = 10; 
+//    unsigned digit = n % base;
+//    uint8_t i = 0;
+//
+//    if ( n /= base ) i += my_itoa( s, n );
+//
+//    s[i++] = digit + '0';
+//
+//    return i;
+//} 
+
 // Render the Level Select menu
 static void render_level_select(Canvas* canvas, BomberAppState* state) {
     furi_assert(state);
 
     canvas_set_font(canvas, FontPrimary);
-
     canvas_draw_str(canvas, 31, 12, "Select Level");
-    canvas_draw_str(canvas, 9, 29, "1");
-    canvas_draw_str(canvas, 9, 53, "3");
-    canvas_draw_str(canvas, 66, 29, "2");
-    canvas_draw_str(canvas, 66, 53, "4");
 
-    canvas_draw_frame(canvas, 18, 15, 36, 20);
-    canvas_draw_frame(canvas, 75, 15, 36, 20);
-    canvas_draw_frame(canvas, 18, 39, 36, 20);
-    canvas_draw_frame(canvas, 75, 39, 36, 20);
+    uint8_t page_number = state->selectedLevel / 4;
+    uint8_t start = page_number * 4;
+    uint8_t levelCount = sizeof(all_levels) / sizeof(int);
 
-    render_level_preview(canvas, 20, 17, level1);
-    render_level_preview(canvas, 77, 17, level2);
-    render_level_preview(canvas, 20, 41, level3);
-    render_level_preview(canvas, 77, 41, level4);
+    for (uint8_t ix = 0; ix < 4; ix++) {
+        uint8_t displayLevel = start + ix;
 
-    switch (state->selectedLevel) {
-        case 0:
-            canvas_draw_frame(canvas, 7, 19, 10, 12);
-            break;
-        case 1:
-            canvas_draw_frame(canvas, 64, 19, 10, 12);
-            break;
-        case 2:
-            canvas_draw_frame(canvas, 7, 43, 10, 12);
-            break;
-        case 3:
-            canvas_draw_frame(canvas, 64, 43, 10, 12);
-            break;
+        if (displayLevel < levelCount) {
+            uint8_t x = ix % 2 == 0 ? 18 : 75;
+            uint8_t y = ix > 1 ? 39 : 15;
+
+            canvas_draw_frame(canvas, x, y, 36, 20);
+            render_level_preview(canvas, x + 2, y + 2, all_levels[displayLevel]);
+            if (displayLevel == state->selectedLevel) {
+                canvas_draw_xbm(canvas, x - 6, y + 5, 4, 7, select_glyph);
+            }
+        }
     }
 }
 
 static void render_game_over(Canvas* canvas, BomberAppState* state) {
+    furi_assert(state);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 15, 14, "Game Over!");
     if(state->dead == WhoDied_Fox) {
@@ -140,6 +143,12 @@ static void render_game_over(Canvas* canvas, BomberAppState* state) {
     } else {
         canvas_draw_str(canvas, 15, 30, "Fox Wins!");
     }
+}
+
+static void render_wait_screen(Canvas* canvas, BomberAppState* state) {
+    furi_assert(state);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 15, 14, "Waiting for fox...");
 }
 
 // Main callback that starts off rendering
@@ -167,6 +176,8 @@ void bomber_ui_render_callback(Canvas* canvas, void* context) {
     case BomberAppMode_GameOver:
         render_game_over(canvas, state);
         break;
+    case BomberAppMode_Waiting:
+        render_wait_screen(canvas, state);
     default:
         break;
     }
