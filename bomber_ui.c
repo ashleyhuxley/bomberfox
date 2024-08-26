@@ -94,6 +94,19 @@ static void render_level_preview(Canvas* canvas, uint8_t offset_x, uint8_t offse
     }
 }
 
+//uint8_t my_itoa( char *s, uint8_t n )
+//{
+//    const unsigned base = 10; 
+//    unsigned digit = n % base;
+//    uint8_t i = 0;
+//
+//    if ( n /= base ) i += my_itoa( s, n );
+//
+//    s[i++] = digit + '0';
+//
+//    return i;
+//} 
+
 // Render the Level Select menu
 static void render_level_select(Canvas* canvas, BomberAppState* state) {
     furi_assert(state);
