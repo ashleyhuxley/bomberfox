@@ -6,15 +6,15 @@ name: "FAP: Build for multiple SDK sources"
 on:
   push:
     ## put your main branch name under "branches"
-    #branches: 
-    #  - master 
+    branches: 
+      - main 
   pull_request:
   schedule: 
     # do a build every day
     - cron: "1 1 * * *"
 
 jobs:
-  ufbt-build:
+  ufbt-build-action:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -23,7 +23,12 @@ jobs:
             sdk-channel: dev
           - name: release channel
             sdk-channel: release
-          # You can add unofficial channels here. See ufbt action docs for more info.
+          - name: Momentum Firmware Development
+            sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
+            sdk-channel: development
+          - name: Momentum Firmware Release
+            sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
+            sdk-channel: release
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
@@ -33,6 +38,7 @@ jobs:
         id: build-app
         with:
           sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-index-url: ${{ matrix.sdk-index-url }}
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
