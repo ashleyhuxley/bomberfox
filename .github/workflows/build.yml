@@ -25,7 +25,7 @@ jobs:
             sdk-channel: release
           - name: Momentum Firmware Development
             sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
-            sdk-channel: development
+            sdk-channel: dev
           - name: Momentum Firmware Release
             sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
             sdk-channel: release
