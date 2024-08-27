@@ -1,6 +1,7 @@
 #include "bomber_loop.h"
 #include "helpers.h"
 #include "subghz.h"
+#include "levels.h"
 
 #define BOMB_HOT_TIME furi_ms_to_ticks(2000)
 #define BOMB_PLANTED_TIME furi_ms_to_ticks(2100)
@@ -28,10 +29,57 @@ static void bomber_app_error(BomberAppState* state) {
     bomber_app_set_mode(state, BomberAppMode_Error);
 }
 
+static void bomber_app_wait(BomberAppState* state) {
+    FURI_LOG_E(TAG, "Waiting for P1 to select level");
+    state->rxMode = RxMode_LevelData;
+    bomber_app_set_mode(state, BomberAppMode_Waiting);
+}
+
 // Start playing
 static void bomber_app_start(BomberAppState* state) {
     FURI_LOG_I(TAG, "Start playing");
+
+    // Figure out player starting positions from level data
+    state->fox = bomber_app_get_block(state->level, BlockType_Fox);
+    state->level[ix(state->fox.x, state->fox.y)] = (uint8_t)BlockType_Empty;
+    state->wolf = bomber_app_get_block(state->level, BlockType_Wolf);
+    state->level[ix(state->wolf.x, state->wolf.y)] = (uint8_t)BlockType_Empty;
+
     bomber_app_set_mode(state, BomberAppMode_Playing);
+}
+
+static void bomber_app_setup_level(BomberAppState* state) {
+    state->level = all_levels[state->selectedLevel];
+    uint8_t wall_count = count_walls(state->level);
+    uint8_t powerup_bomb_count = (uint8_t)round((POWERUP_EXTRABOMB_RATIO * wall_count));
+    uint8_t powerup_power_count = (uint8_t)round((POWERUP_BOMBPOWER_RATIO * wall_count));
+    FURI_LOG_D(TAG, "Walls: %d, Extra Bombs: %d, Bomb Power: %d", wall_count, powerup_bomb_count, powerup_power_count);
+
+    uint8_t* bomb_powerups = malloc(sizeof(uint8_t) * powerup_bomb_count);
+    uint8_t* power_powerups = malloc(sizeof(uint8_t) * powerup_power_count);
+
+    get_random_powerup_locations(state->level, powerup_bomb_count, bomb_powerups);
+    get_random_powerup_locations(state->level, powerup_power_count, power_powerups);
+
+    for (uint8_t i = 0; i < powerup_bomb_count; i++) {
+        state->level[bomb_powerups[i]] = BlockType_PuExtraBomb_Hidden;
+    }
+    for (uint8_t i = 0; i < powerup_power_count; i++) {
+        state->level[power_powerups[i]] = BlockType_PuBombStrength_Hidden;
+    }
+
+    free(bomb_powerups);
+    free(power_powerups);
+
+    // Tx level data
+    subghz_tx_level_data(state, state->level);
+
+    bomber_app_start(state);
+}
+
+static void bomber_app_select_level(BomberAppState* state) {
+    FURI_LOG_I(TAG, "Select Level");
+    bomber_app_set_mode(state, BomberAppMode_LevelSelect);
 }
 
 // Check if a particular coordingate is occupied by a players active bomb
@@ -120,13 +168,48 @@ static bool handle_player_select_input(BomberAppState* state, InputEvent input) 
             state->isPlayerTwo = !state->isPlayerTwo;
             return true;
         case InputKeyOk:
-            bomber_app_start(state);
+            if (!state->isPlayerTwo) {
+                bomber_app_select_level(state);
+            } else {
+                bomber_app_wait(state);
+            }
             return true;
         default:
             return false;
         }
     }
     return false;
+}
+
+static bool handle_levelselect_input(BomberAppState* state, InputEvent input) {
+    if(input.type == InputTypeShort) {
+        switch(input.key) {
+            case InputKeyOk:
+                bomber_app_setup_level(state);
+                return true;
+            case InputKeyUp:
+                state->selectedLevel -= 2;
+                break;
+            case InputKeyDown:
+                state->selectedLevel += 2;
+                break;
+            case InputKeyLeft:
+                state->selectedLevel -= 1;
+                break;
+            case InputKeyRight:
+                state->selectedLevel += 1;
+                break;
+            default:
+                return false;
+        }
+    }
+
+    uint8_t levelCount = sizeof(all_levels) / sizeof(int);
+    if (state->selectedLevel >= levelCount) {
+        state->selectedLevel = levelCount - 1;
+    }
+
+    return true;
 }
 
 // Handle input while playing the game
@@ -191,6 +274,8 @@ static bool bomber_app_handle_input(BomberAppState* state, InputEvent input) {
         return handle_game_input(state, input);
     case BomberAppMode_PlayerSelect:
         return handle_player_select_input(state, input);
+    case BomberAppMode_LevelSelect:
+        return handle_levelselect_input(state, input);
     default:
         break;
     }
@@ -209,7 +294,14 @@ void bomber_main_loop(BomberAppState* state) {
     state->running = true;
 
     while(state->running) {
-        subghz_check_incoming(state);
+        switch (state->rxMode) {
+            case RxMode_Command:
+                subghz_check_incoming(state);
+                break;
+            case RxMode_LevelData:
+                subghz_check_incoming_leveldata(state);
+                break;
+        }
 
         switch(furi_message_queue_get(state->queue, &event, LOOP_MESSAGE_TIMEOUT_ms)) {
         case FuriStatusOk:
@@ -226,6 +318,13 @@ void bomber_main_loop(BomberAppState* state) {
             case BomberEventType_SubGhz:
                 FURI_LOG_I(TAG, "SubGhz Event from queue");
                 bomber_game_post_rx(state, event.subGhzIncomingSize);
+                updated = true;
+                break;
+            case BomberEventType_HaveLevelData:
+                FURI_LOG_I(TAG, "Level data event from queue");
+                state->level = state->levelData;
+                state->rxMode = RxMode_Command;
+                bomber_app_start(state);
                 updated = true;
                 break;
             default:
