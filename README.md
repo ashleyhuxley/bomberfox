@@ -6,8 +6,10 @@ For more information about the SubGHz protocol, please see [protocol.md](protoco
 
 ## How to play
 - Select a character, Wolf Or Fox!
+- Fox is Player 1 and chooses the level. Ensure Player 2 has selected "Wolf" before Fox starts the game.
 - Move with directional D-Pad
 - Place Bomb with Center Button
+- Broken walls may reveal hidden power-ups! Either extra bombs, or increased explosion distance.
 - Exit Game by holding the return button
 
 To play multiplayer locally with another person, make sure you select different characters!
