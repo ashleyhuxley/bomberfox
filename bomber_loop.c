@@ -245,12 +245,6 @@ static bool handle_game_input(BomberAppState* state, InputEvent input) {
         case InputKeyLeft:
         case InputKeyRight:
             return handle_game_direction(state, input);
-        case InputKeyBack:
-            if(state->mode == BomberAppMode_Playing) {
-                bomber_app_stop_playing(state);
-                return true;
-            }
-            break;
         default:
             break;
         }
@@ -264,7 +258,7 @@ static bool handle_game_input(BomberAppState* state, InputEvent input) {
 // input: Represents the input event
 // returns: true if the viewport should be updated, else false
 static bool bomber_app_handle_input(BomberAppState* state, InputEvent input) {
-    if(input.type == InputTypeLong && input.key == InputKeyBack) {
+    if(input.key == InputKeyBack) {
         bomber_app_quit(state);
         return false; // don't try to update the UI while quitting
     }
