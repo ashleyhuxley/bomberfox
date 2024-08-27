@@ -10,13 +10,6 @@
 #define MAX_X 16
 #define MAX_Y 8
 
-// End the game but don't quit the app
-// TODO: Figure out whether this actually needs to be here. What should happen when the player presses Back during gameplay?
-static void bomber_app_stop_playing(BomberAppState* state) {
-    FURI_LOG_I(TAG, "Stop playing");
-    bomber_app_set_mode(state, BomberAppMode_Finished);
-}
-
 // Quit the app
 static void bomber_app_quit(BomberAppState* state) {
     FURI_LOG_I(TAG, "Quitting");
@@ -245,12 +238,6 @@ static bool handle_game_input(BomberAppState* state, InputEvent input) {
         case InputKeyLeft:
         case InputKeyRight:
             return handle_game_direction(state, input);
-        case InputKeyBack:
-            if(state->mode == BomberAppMode_Playing) {
-                bomber_app_stop_playing(state);
-                return true;
-            }
-            break;
         default:
             break;
         }
@@ -264,7 +251,7 @@ static bool handle_game_input(BomberAppState* state, InputEvent input) {
 // input: Represents the input event
 // returns: true if the viewport should be updated, else false
 static bool bomber_app_handle_input(BomberAppState* state, InputEvent input) {
-    if(input.type == InputTypeLong && input.key == InputKeyBack) {
+    if(input.key == InputKeyBack) {
         bomber_app_quit(state);
         return false; // don't try to update the UI while quitting
     }
