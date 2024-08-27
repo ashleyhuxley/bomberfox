@@ -1,5 +1,3 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
     appid="bomberfox",  # Must be unique
     name="Bomber Fox",  # Displayed in menus
@@ -8,9 +6,9 @@ App(
     stack_size=2 * 1024,
     fap_category="Games",
     fap_version="0.1",
-    fap_icon="fops.png",  # 10x10 1-bit PNG
-    fap_description="Simple bomber game",
+    fap_icon="fops.png",
+    fap_description="Two Player Bomber game over Sub-Ghz Radio",
     fap_author="Electric Fox",
     fap_weburl="https://github.com/ashleyhuxley/bomber",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_icon_assets="images",
 )
