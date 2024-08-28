@@ -123,12 +123,32 @@ static void render_level_select(Canvas* canvas, BomberAppState* state) {
 
 static void render_game_over(Canvas* canvas, BomberAppState* state) {
     furi_assert(state);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 15, 14, "Game Over!");
-    if(state->dead == WhoDied_Fox) {
-        canvas_draw_str(canvas, 15, 30, "Wolf Wins!");
+    if(state->dead == WhoDied_Fox && state->isPlayerTwo == false) {
+        canvas_draw_str(canvas, 4, 19, "GAME OVER");
+        canvas_draw_xbm(canvas, 74, 6, 51, 54, rip_glyph);
+
+        if (state->suicide) {
+            canvas_draw_str(canvas, 4, 38, "You have");
+            canvas_draw_str(canvas, 4, 49, "blown yourself");
+            canvas_draw_str(canvas, 4, 60, "up.");
+        } else {
+            canvas_draw_str(canvas, 4, 38, "You have been");
+            canvas_draw_str(canvas, 4, 49, "blown up by");
+            canvas_draw_str(canvas, 4, 60, "the other player");
+        }
     } else {
-        canvas_draw_str(canvas, 15, 30, "Fox Wins!");
+        canvas_draw_str(canvas, 4, 19, "YOU WIN!");
+        canvas_draw_xbm(canvas, 71, 5, 46, 48, happyfops_glyph);
+
+        if (state->suicide) {
+            canvas_draw_str(canvas, 4, 38, "The other");
+            canvas_draw_str(canvas, 4, 49, "player blew");
+            canvas_draw_str(canvas, 4, 60, "themselves up.");
+        } else {
+            canvas_draw_str(canvas, 4, 38, "You have");
+            canvas_draw_str(canvas, 4, 49, "blown up");
+            canvas_draw_str(canvas, 4, 60, "the other player!");
+        }
     }
 }
 
