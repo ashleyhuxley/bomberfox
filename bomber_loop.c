@@ -1,3 +1,5 @@
+#include <dolphin/dolphin.h>
+
 #include "bomber_loop.h"
 #include "helpers.h"
 #include "subghz.h"
@@ -31,6 +33,8 @@ static void bomber_app_wait(BomberAppState* state) {
 // Start playing
 static void bomber_app_start(BomberAppState* state) {
     FURI_LOG_I(TAG, "Start playing");
+
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     // Figure out player starting positions from level data
     state->fox = bomber_app_get_block(state->level, BlockType_Fox);

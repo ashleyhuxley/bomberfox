@@ -1,3 +1,5 @@
+#include <dolphin/dolphin.h>
+
 #include "subghz.h"
 #include "types.h"
 #include "helpers.h"
@@ -121,6 +123,8 @@ void bomber_game_post_rx(BomberAppState* state, size_t rx_size) {
         break;
     case ACTION_DEATH:
         bomber_app_set_mode(state, BomberAppMode_GameOver);
+        dolphin_deed(DolphinDeedPluginGameWin);
+        
         if(state->isPlayerTwo) {
             state->dead = WhoDied_Fox;
         } else {
