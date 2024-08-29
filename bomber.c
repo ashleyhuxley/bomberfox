@@ -8,7 +8,6 @@
 #include "radio_device_loader.h"
 #include "types.h"
 #include "subghz.h"
-//#include <dolphin/dolphin.h>
 
 static BomberAppState* state;
 
