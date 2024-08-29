@@ -43,5 +43,5 @@ The wolf has died
 
 ## Level Data Mode
 
-When the Wolf character is chosen, the application enters Level Data Mode and and waits for transmission of the level data. Once the Fox character has chosen a level, the 128 bytes of level data are transferred to the Wolf, which then reverts to Command mode.
+When the Wolf character is chosen, the application enters Level Data Mode and waits for transmission of the level data. Once the Fox character has chosen a level, the 128 bytes of level data are transferred to the Wolf, which then reverts to Command mode.
 
