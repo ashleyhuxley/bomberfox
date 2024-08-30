@@ -123,7 +123,7 @@ static void render_level_select(Canvas* canvas, BomberAppState* state) {
 
 static void render_game_over(Canvas* canvas, BomberAppState* state) {
     furi_assert(state);
-    if(state->dead == WhoDied_Fox && state->isPlayerTwo == false) {
+    if(state->isDead) {
         canvas_draw_str(canvas, 4, 19, "GAME OVER");
         canvas_draw_xbm(canvas, 74, 6, 51, 54, rip_glyph);
 
