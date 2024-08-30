@@ -353,13 +353,8 @@ static bool handle_explosion(BomberAppState* state, uint8_t x, uint8_t y, bool o
     Player* player = get_player(state);
 
     if(player->x == x && player->y == y) {
-        if(state->isPlayerTwo) {
-            state->dead = WhoDied_Wolf;
-        } else {
-            state->dead = WhoDied_Fox;
-        }
-
         tx_death(state);
+        state->isDead = true;
         state->suicide = ownBombs;
         bomber_app_set_mode(state, BomberAppMode_GameOver);
     }

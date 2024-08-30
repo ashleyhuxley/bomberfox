@@ -123,8 +123,6 @@ typedef struct {
     size_t subGhzIncomingSize;
 } BomberEvent;
 
-typedef enum { WhoDied_None, WhoDied_Fox, WhoDied_Wolf } WhoDied;
-
 typedef struct {
     FuriMessageQueue* queue; // Message queue
     FuriMutex* data_mutex; // Mutex
@@ -140,7 +138,7 @@ typedef struct {
     bool isPlayerTwo;
     uint8_t selectedLevel;
 
-    WhoDied dead;
+    bool isDead;
     bool suicide;
 
     // for Sub-GHz
