@@ -31,7 +31,14 @@ bool bomber_app_init()
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if (!state->data_mutex)
     {
-        FURI_LOG_E(TAG, "Failed to allocate mutex");
+        FURI_LOG_E(TAG, "Failed to allocate data mutex");
+        return false;
+    }
+
+    state->timer_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if (!state->timer_mutex)
+    {
+        FURI_LOG_E(TAG, "Failed to allocate timer mutex");
         return false;
     }
 
@@ -154,9 +161,16 @@ void bomber_app_destroy()
 
     if (state->data_mutex)
     {
-        FURI_LOG_T(TAG, "  Freeing mutex");
+        FURI_LOG_T(TAG, "  Freeing data mutex");
         furi_mutex_free(state->data_mutex);
         state->data_mutex = NULL;
+    }
+
+    if (state->timer_mutex)
+    {
+        FURI_LOG_T(TAG, "  Freeing timer mutex");
+        furi_mutex_free(state->timer_mutex);
+        state->timer_mutex = NULL;
     }
     
     if (state)

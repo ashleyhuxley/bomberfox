@@ -391,13 +391,16 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
             }
 
             if(time > BOMB_EXPLODE_TIME) {
+                
                 bomb->state = BombState_Explode;
 
                 // Loop for X Negative direction
                 for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
                     if(handle_explosion(state, bomb->x - j, bomb->y, ownBombs)) {
                         changed = true;
-                        break;
+                        FURI_LOG_D(TAG, "CHANGED SET TRUE X NEG, BREAKING");
+                        // break;
+                        j = player->bomb_power + 1;
                     }
 
                 }
@@ -436,14 +439,15 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
             }
         }
     }
-
     return changed;
 }
 
 bool bomber_game_tick(BomberAppState* state) {
     bool changed = false;
-    changed &= update_bombs(&state->fox, state, !state->isPlayerTwo);
-    changed &= update_bombs(&state->wolf, state, state->isPlayerTwo);
-
+    if(furi_mutex_acquire(state->timer_mutex, 0) == FuriStatusOk) { // No Magic Numbers : The zero here refers to 0 timeout on the mutex wait, causing any threads which request this mutex to fail silently rather than building up a queue.
+        changed &= update_bombs(&state->fox, state, !state->isPlayerTwo);
+        changed &= update_bombs(&state->wolf, state, state->isPlayerTwo);
+        furi_mutex_free(state->timer_mutex);
+    }
     return changed;
 }

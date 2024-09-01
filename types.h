@@ -128,6 +128,7 @@ typedef struct {
 typedef struct {
     FuriMessageQueue* queue; // Message queue
     FuriMutex* data_mutex; // Mutex
+    FuriMutex* timer_mutex; // Mutex
     ViewPort* view_port; // Viewport
     Gui* gui; // GUI
     NotificationApp* notification;
