@@ -90,8 +90,6 @@ bool bomber_app_init()
 
     subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device, state->frequency);
 
-    furi_timer_start(state->timer, furi_ms_to_ticks(25));
-
     // Init UI
     state->view_port = view_port_alloc();
     if (!state->view_port)

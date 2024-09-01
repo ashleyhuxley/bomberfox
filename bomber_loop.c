@@ -43,6 +43,7 @@ static void bomber_app_start(BomberAppState* state) {
     state->level[ix(state->wolf.x, state->wolf.y)] = (uint8_t)BlockType_Empty;
 
     bomber_app_set_mode(state, BomberAppMode_Playing);
+    furi_timer_start(state->timer, furi_ms_to_ticks(25));
 }
 
 static void bomber_app_setup_level(BomberAppState* state) {
@@ -406,24 +407,24 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
                 }
 
                 // Loop for X Positive direction
-                for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
-                    if(handle_explosion(state, bomb->x + j, bomb->y, ownBombs)) {
+                for(uint8_t k = 0; k < player->bomb_power + 1; k++) {
+                    if(handle_explosion(state, bomb->x + k, bomb->y, ownBombs)) {
                         changed = true;
                         break;
                     }
                 }
 
                 // Loop for Y Positive direction
-                for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
-                    if(handle_explosion(state, bomb->x, bomb->y + j, ownBombs)) {
+                for(uint8_t l = 0; l < player->bomb_power + 1; l++) {
+                    if(handle_explosion(state, bomb->x, bomb->y + l, ownBombs)) {
                         changed = true;
                         break;
                     }
                 }
 
                 // Loop for Y Negative direction
-                for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
-                    if(handle_explosion(state, bomb->x, bomb->y - j, ownBombs)) {
+                for(uint8_t m = 0; m < player->bomb_power + 1; m++) {
+                    if(handle_explosion(state, bomb->x, bomb->y - m, ownBombs)) {
                         changed = true;
                         break;
                     }
