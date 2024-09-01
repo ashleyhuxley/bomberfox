@@ -39,6 +39,9 @@ static void draw_block(Canvas* canvas, int x, int y, BlockType block) {
     case BlockType_PuExtraBomb:
         canvas_draw_xbm(canvas, x * 8, y * 8, 8, 8, powerup_extrabomb_glyph);
         break;
+    case BlockType_Wall:
+        canvas_draw_xbm(canvas, x * 8, y * 8, 8, 8, wall_glyph);
+        break;
     case BlockType_Empty:
     default:
         break;

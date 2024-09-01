@@ -123,7 +123,7 @@ static bool handle_game_direction(BomberAppState* state, InputEvent input) {
 
     // Only allow move to new position if the block at that position is not occupied
     BlockType block = (BlockType)(state->level)[ix(newPoint.x, newPoint.y)];
-    if(block == BlockType_Brick || block == BlockType_PuBombStrength_Hidden || block == BlockType_PuExtraBomb_Hidden) {
+    if(block == BlockType_Brick || block == BlockType_PuBombStrength_Hidden || block == BlockType_PuExtraBomb_Hidden || block == BlockType_Wall) {
         return false;
     }
 
@@ -369,13 +369,18 @@ static bool handle_explosion(BomberAppState* state, uint8_t x, uint8_t y, bool o
     case BlockType_PuExtraBomb_Hidden:
         state->level[ix(x, y)] = BlockType_PuExtraBomb;
         return true;
+    case BlockType_Wall:
+        return true;
     default:
         return false;
     }
 }
 
 static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
-    bool changed = false;
+    bool hitXNeg = false;
+    bool hitXPos = false;
+    bool hitYNeg = false;
+    bool hitYPos = false;
 
     for(uint8_t i = 0; i < MAX_BOMBS; i++) {
         Bomb* bomb = &player->bombs[i];
@@ -392,10 +397,18 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
                 bomb->state = BombState_Explode;
 
                 for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
-                    changed &= handle_explosion(state, bomb->x - j, bomb->y, ownBombs);
-                    changed &= handle_explosion(state, bomb->x + j, bomb->y, ownBombs);
-                    changed &= handle_explosion(state, bomb->x, bomb->y + j, ownBombs);
-                    changed &= handle_explosion(state, bomb->x, bomb->y - j, ownBombs);
+                    if(!hitXNeg) {
+                        hitXNeg &= handle_explosion(state, bomb->x - j, bomb->y, ownBombs);
+                    }
+                    if(!hitXPos) {
+                        hitXPos &= handle_explosion(state, bomb->x + j, bomb->y, ownBombs);
+                    }
+                    if(!hitYPos) {
+                        hitYPos &= handle_explosion(state, bomb->x, bomb->y + j, ownBombs);
+                    }
+                    if(!hitYNeg) {
+                        hitYNeg &= handle_explosion(state, bomb->x, bomb->y - j, ownBombs);
+                    }
                 }
 
                 continue;
@@ -409,7 +422,7 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
         }
     }
 
-    return changed;
+    return hitXNeg || hitXPos || hitYNeg || hitYPos;
 }
 
 bool bomber_game_tick(BomberAppState* state) {
