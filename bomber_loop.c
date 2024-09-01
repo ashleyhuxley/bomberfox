@@ -448,7 +448,7 @@ bool bomber_game_tick(BomberAppState* state) {
     if(furi_mutex_acquire(state->timer_mutex, 0) == FuriStatusOk) { // No Magic Numbers : The zero here refers to 0 timeout on the mutex wait, causing any threads which request this mutex to fail silently rather than building up a queue.
         changed &= update_bombs(&state->fox, state, !state->isPlayerTwo);
         changed &= update_bombs(&state->wolf, state, state->isPlayerTwo);
-        furi_mutex_free(state->timer_mutex);
+        furi_mutex_release(state->timer_mutex);
     }
     return changed;
 }
