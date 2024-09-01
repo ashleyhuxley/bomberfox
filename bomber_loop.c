@@ -377,10 +377,7 @@ static bool handle_explosion(BomberAppState* state, uint8_t x, uint8_t y, bool o
 }
 
 static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
-    bool hitXNeg = false;
-    bool hitXPos = false;
-    bool hitYNeg = false;
-    bool hitYPos = false;
+    bool changed = false;
 
     for(uint8_t i = 0; i < MAX_BOMBS; i++) {
         Bomb* bomb = &player->bombs[i];
@@ -396,18 +393,36 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
             if(time > BOMB_EXPLODE_TIME) {
                 bomb->state = BombState_Explode;
 
+                // Loop for X Negative direction
                 for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
-                    if(!hitXNeg) {
-                        hitXNeg &= handle_explosion(state, bomb->x - j, bomb->y, ownBombs);
+                    if(handle_explosion(state, bomb->x - j, bomb->y, ownBombs)) {
+                        changed = true;
+                        break;
                     }
-                    if(!hitXPos) {
-                        hitXPos &= handle_explosion(state, bomb->x + j, bomb->y, ownBombs);
+
+                }
+
+                // Loop for X Positive direction
+                for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
+                    if(handle_explosion(state, bomb->x + j, bomb->y, ownBombs)) {
+                        changed = true;
+                        break;
                     }
-                    if(!hitYPos) {
-                        hitYPos &= handle_explosion(state, bomb->x, bomb->y + j, ownBombs);
+                }
+
+                // Loop for Y Positive direction
+                for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
+                    if(handle_explosion(state, bomb->x, bomb->y + j, ownBombs)) {
+                        changed = true;
+                        break;
                     }
-                    if(!hitYNeg) {
-                        hitYNeg &= handle_explosion(state, bomb->x, bomb->y - j, ownBombs);
+                }
+
+                // Loop for Y Negative direction
+                for(uint8_t j = 0; j < player->bomb_power + 1; j++) {
+                    if(handle_explosion(state, bomb->x, bomb->y - j, ownBombs)) {
+                        changed = true;
+                        break;
                     }
                 }
 
@@ -422,7 +437,7 @@ static bool update_bombs(Player* player, BomberAppState* state, bool ownBombs) {
         }
     }
 
-    return hitXNeg || hitXPos || hitYNeg || hitYPos;
+    return changed;
 }
 
 bool bomber_game_tick(BomberAppState* state) {
