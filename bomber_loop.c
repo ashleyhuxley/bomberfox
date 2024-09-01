@@ -43,7 +43,7 @@ static void bomber_app_start(BomberAppState* state) {
     state->level[ix(state->wolf.x, state->wolf.y)] = (uint8_t)BlockType_Empty;
 
     bomber_app_set_mode(state, BomberAppMode_Playing);
-    furi_timer_start(state->timer, furi_ms_to_ticks(25));
+    furi_timer_start(state->timer, furi_ms_to_ticks(100));
 }
 
 static void bomber_app_setup_level(BomberAppState* state) {
