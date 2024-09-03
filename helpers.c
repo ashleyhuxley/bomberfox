@@ -53,9 +53,9 @@ void get_random_powerup_locations(uint8_t level[], int n, uint8_t output[]) {
 // Returns the player's position if found, otherwise returns a default position (0,0)
 Player get_player_start_position(uint8_t level[], BlockType blockType)
 {
-    for(int x = 0; x < 16; x++)
+    for(int x = 0; x < MAX_X; x++)
     {
-        for(int y = 0; y < 8; y++)
+        for(int y = 0; y < MAX_Y; y++)
         {
             if((BlockType)level[ix(x, y)] == blockType)
             {
@@ -88,7 +88,7 @@ Player get_player_start_position(uint8_t level[], BlockType blockType)
 // Helper function to calculate the 1-dimensional index from 2 dimensions
 int ix(int x, int y)
 {
-    return (y * 16) + x;
+    return (y * MAX_X) + x;
 }
 
 // Returns a pointer to the playable character depending on the isPlayerTwo state

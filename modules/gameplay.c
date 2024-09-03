@@ -72,8 +72,8 @@ void bomber_game_render(Canvas * canvas, BomberAppState * state) {
     }
 
     // Draw players and blocks
-    for (uint8_t x = 0; x < 16; x++) {
-        for (uint8_t y = 0; y < 8; y++) {
+    for (uint8_t x = 0; x < MAX_X; x++) {
+        for (uint8_t y = 0; y < MAX_Y; y++) {
             if (x == state -> fox.x && y == state -> fox.y) {
                 bomber_game_draw_player(canvas, x, y, fox_glyph);
             }

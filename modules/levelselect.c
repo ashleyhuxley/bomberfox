@@ -41,8 +41,8 @@ bool bomber_levelselect_input(BomberAppState* state, InputEvent input) {
 
 // Render a small preview of a level for the level select menu
 static void bomber_levelselect_render_preview(Canvas* canvas, uint8_t offset_x, uint8_t offset_y, uint8_t* level) {
-    for(uint8_t x = 0; x < 16; x++) {
-        for(uint8_t y = 0; y < 8; y++) {
+    for(uint8_t x = 0; x < MAX_X; x++) {
+        for(uint8_t y = 0; y < MAX_Y; y++) {
             BlockType block = (BlockType)level[ix(x, y)];
             if (is_solid_block(block)) {
                 canvas_draw_frame(canvas, offset_x + (x * 2), offset_y + (y * 2), 2, 2);
@@ -58,11 +58,11 @@ void bomber_levelselect_render(Canvas* canvas, BomberAppState* state) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 31, 12, "Select Level");
 
-    uint8_t page_number = state->selectedLevel / 4;
-    uint8_t start = page_number * 4;
+    uint8_t page_number = state->selectedLevel / ITEMS_PER_PAGE;
+    uint8_t start = page_number * ITEMS_PER_PAGE;
     uint8_t levelCount = sizeof(all_levels) / sizeof(int);
 
-    for (uint8_t ix = 0; ix < 4; ix++) {
+    for (uint8_t ix = 0; ix < ITEMS_PER_PAGE; ix++) {
         uint8_t displayLevel = start + ix;
 
         if (displayLevel < levelCount) {
