@@ -1,13 +1,4 @@
-#include <furi.h>
-
 #include "bomber.h"
-#include "bomber_ui.h"
-#include "bomber_loop.h"
-#include "levels.h"
-#include "helpers.h"
-#include "radio_device_loader.h"
-#include "types.h"
-#include "subghz.h"
 
 static BomberAppState* state;
 
@@ -42,7 +33,7 @@ bool bomber_app_init()
         return false;
     }
 
-    bomber_app_set_mode(state, BomberAppMode_Uninitialised);
+    state->mode = BomberAppMode_Uninitialised;
 
     // Allocate message queue
     state->queue = furi_message_queue_alloc(8, sizeof(BomberEvent));
@@ -61,7 +52,7 @@ bool bomber_app_init()
     }
    
     // Allocate timer
-    state->timer = furi_timer_alloc(bomber_game_update_timer_callback, FuriTimerTypePeriodic, state->queue);
+    state->timer = furi_timer_alloc(bomber_callback_timer_tick, FuriTimerTypePeriodic, state->queue);
     if (!state->timer)
     {
         FURI_LOG_E(TAG, "Failed to allocate timer");
@@ -77,7 +68,7 @@ bool bomber_app_init()
     }
 
     state->frequency = DEFAULT_FREQ;
-    subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, have_read_cb, state);
+    subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, bomber_callback_subghz_read, state);
     subghz_devices_init();
     state->subghz_device = radio_device_loader_set(state->subghz_device, SubGhzRadioDeviceTypeExternalCC1101);
     subghz_devices_reset(state->subghz_device);
@@ -98,23 +89,12 @@ bool bomber_app_init()
         return false;
     }
 
-    view_port_draw_callback_set(state->view_port, bomber_ui_render_callback, state);
-    view_port_input_callback_set(state->view_port, bomber_ui_input_callback, state->queue);
+    view_port_draw_callback_set(state->view_port, bomber_callback_ui_render, state);
+    view_port_input_callback_set(state->view_port, bomber_callback_ui_input, state->queue);
     state->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(state->gui, state->view_port, GuiLayerFullscreen);
 
     return true;
-}
-
-void bomber_game_update_timer_callback()
-{
-    FURI_LOG_T(TAG, "Timer Callback");
-
-    BomberEvent event = {.type = BomberEventType_Tick };
-
-    if(furi_message_queue_put(state->queue, &event, FuriWaitForever) != FuriStatusOk) {
-        FURI_LOG_W(TAG, "Failed to put timer event in message queue");
-    }
 }
 
 void bomber_app_destroy()
@@ -197,7 +177,7 @@ int32_t bomber_main(void* p)
     state->isDead = false;
     state->suicide = false;
     
-    bomber_app_set_mode(state, BomberAppMode_PlayerSelect);
+    bomber_app_select_player(state);
 
     bomber_main_loop(state);
 

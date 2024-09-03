@@ -1,12 +1,7 @@
 #include "helpers.h"
-#include "types.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <furi.h>
-
-// Function to count the number of walls in a given level
-uint8_t count_walls(uint8_t level[])
+// Function to count the number of bricks in a given level
+uint8_t count_bricks_in_level(uint8_t level[])
 {
     uint8_t brickCount = 0;
     for (uint8_t i = 0; i < LEVEL_SIZE; i++) {
@@ -20,7 +15,7 @@ uint8_t count_walls(uint8_t level[])
 
 // Function to select (n) random walls from the level data. Returns the indicies in the output array
 void get_random_powerup_locations(uint8_t level[], int n, uint8_t output[]) {
-    uint8_t brickCount = count_walls(level);
+    uint8_t brickCount = count_bricks_in_level(level);
 
     srand(furi_get_tick());
 
@@ -56,7 +51,7 @@ void get_random_powerup_locations(uint8_t level[], int n, uint8_t output[]) {
 
 // Extracts the starting location of the player from the level data
 // Returns the player's position if found, otherwise returns a default position (0,0)
-Player bomber_app_get_block(uint8_t level[], BlockType blockType)
+Player get_player_start_position(uint8_t level[], BlockType blockType)
 {
     for(int x = 0; x < 16; x++)
     {
@@ -97,24 +92,8 @@ int ix(int x, int y)
 }
 
 // Returns a pointer to the playable character depending on the isPlayerTwo state
-Player* get_player(BomberAppState* state)
+Player* get_current_player(BomberAppState* state)
 {
     furi_assert(state);
     return state->isPlayerTwo ? &(state->wolf) : &(state->fox);
-}
-
-
-// Set the mode with mutex handling
-void bomber_app_set_mode(BomberAppState* state, BomberAppMode mode)
-{
-    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
-    state->mode = mode;
-    furi_mutex_release(state->data_mutex);
-}
-
-bool is_solid_block(BlockType type) {
-    return type == BlockType_Brick ||
-           type == BlockType_PuBombStrength_Hidden ||
-           type == BlockType_PuExtraBomb_Hidden ||
-           type == BlockType_Wall;
 }
