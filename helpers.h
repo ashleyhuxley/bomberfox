@@ -1,14 +1,18 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#include "types.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <furi.h>
 
-Player bomber_app_get_block(uint8_t level[], BlockType blockType);
+#include "types/blocktype.h"
+#include "types/state.h"
+
+
+Player get_player_start_position(uint8_t level[], BlockType blockType);
 int ix(int x, int y);
-Player* get_player(BomberAppState* state);
-void bomber_app_set_mode(BomberAppState* state, BomberAppMode mode);
-uint8_t count_walls(uint8_t level[]);
+Player* get_current_player(BomberAppState* state);
+uint8_t count_bricks_in_level(uint8_t level[]);
 void get_random_powerup_locations(uint8_t level[], int n, uint8_t output[]);
-bool is_solid_block(BlockType type);
 
 #endif
